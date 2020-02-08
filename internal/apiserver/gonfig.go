@@ -1,9 +1,12 @@
 package apiserver
 
+import "github.com/skvoch/burst/internal/store"
+
 // Config ...
 type Config struct {
 	BindAddr string `toml:"bind_addr"`
 	LogLevel string `toml:"log_level"`
+	Store    *store.Config
 }
 
 // NewConfig ...
