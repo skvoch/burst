@@ -8,8 +8,9 @@ import (
 
 // Store ...
 type Store struct {
-	config *Config
-	db     *sql.DB
+	config          *Config
+	db              *sql.DB
+	booksRepository *BooksRepository
 }
 
 // New ...
@@ -52,4 +53,17 @@ func (s *Store) getSourceName() string {
 // Close ...
 func (s *Store) Close() {
 	s.db.Close()
+}
+
+// Books ...
+func (s *Store) Books() *BooksRepository {
+	if s.booksRepository != nil {
+		return s.booksRepository
+	}
+
+	s.booksRepository = &BooksRepository{
+		store: s,
+	}
+
+	return s.booksRepository
 }
