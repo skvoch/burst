@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"github.com/skvoch/burst/internal/store"
+	"github.com/skvoch/burst/internal/app/store"
 )
 
 // APIServer ...

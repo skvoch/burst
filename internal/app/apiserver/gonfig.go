@@ -1,6 +1,6 @@
 package apiserver
 
-import "github.com/skvoch/burst/internal/store"
+import "github.com/skvoch/burst/internal/app/store"
 
 // Config ...
 type Config struct {
