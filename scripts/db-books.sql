@@ -1,5 +1,5 @@
 CREATE TABLE books (
-id integer PRIMARY KEY,
+id bigserial not null primary key,
 name text,
 description text,
 review text,
