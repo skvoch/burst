@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/skvoch/burst/internal/model"
+	"github.com/skvoch/burst/internal/app/model"
 )
 
 // BooksRepository ...
@@ -12,7 +12,7 @@ type BooksRepository struct {
 // Create ...
 func (b *BooksRepository) Create(book *model.Book) error {
 	if err := b.store.db.QueryRow(
-		"INSERT INTRO books (name, description, review, rating, type) VALUES ($1, $2, $3, $4, $5) RETURNING id;",
+		"INSERT INTO books (name, description, review, rating, type) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		book.Name,
 		book.Description,
 		book.Review,
