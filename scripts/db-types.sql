@@ -1,4 +1,1 @@
-CREATE TABLE types (
-id integer PRIMARY KEY,
-name text,
-);
+CREATE TABLE types (id integer PRIMARY KEY, name text);
