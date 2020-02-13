@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="200" align="center" alt="portfolio_view" src="images/logo.png">
+  <img width="250" align="center" alt="portfolio_view" src="images/logo.png">
 </p>
 
 # Burst
