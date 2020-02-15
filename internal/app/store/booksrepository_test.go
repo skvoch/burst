@@ -26,3 +26,26 @@ func TestBooksRepository_Create(t *testing.T) {
 
 	assert.NoError(t, err)
 }
+
+/*
+func TestBooksRepository_GetByType(t *testing.T) {
+	s, teardown := sotre.TestStore(t, databaseURL)
+	defer teardown("books")
+
+	book := &model.Book{
+		ID:          0,
+		Name:        "Golang book",
+		Description: "Super cool book",
+		Review:      "I want to recomend it for you!",
+		Rating:      5,
+		Type:        0,
+	}
+
+	for i:= 0; i < 4; i++ {
+		
+	}
+}
+*/
+
+
+
