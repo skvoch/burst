@@ -1,1 +1,1 @@
-CREATE TABLE types (id integer PRIMARY KEY, name text);
+CREATE TABLE types (id bigserial not null primary key, name text);
