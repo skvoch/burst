@@ -1,4 +1,4 @@
-package store
+package psqlstore
 
 import (
 	"database/sql"
@@ -8,38 +8,19 @@ import (
 
 // Store ...
 type Store struct {
-	config          *Config
 	db              *sql.DB
 	booksRepository *BooksRepository
 	typesRepository *TypesRepository
 }
 
 // New ...
-func New(config *Config) *Store {
+func New(db *sql.DB) *Store {
 	return &Store{
-		config: config,
+		db: db,
 	}
 }
 
-// Open ...
-func (s *Store) Open() error {
-
-	dataSourceName := s.getSourceName()
-	db, err := sql.Open("postgres", dataSourceName)
-
-	if err != nil {
-		return err
-	}
-
-	if err := db.Ping(); err != nil {
-		return err
-	}
-
-	s.db = db
-
-	return nil
-}
-
+/*
 func (s *Store) getSourceName() string {
 
 	dataSourceName := s.config.DatabaseUser
@@ -50,11 +31,7 @@ func (s *Store) getSourceName() string {
 
 	return dataSourceName
 }
-
-// Close ...
-func (s *Store) Close() {
-	s.db.Close()
-}
+*/
 
 // Books ...
 func (s *Store) Books() *BooksRepository {
