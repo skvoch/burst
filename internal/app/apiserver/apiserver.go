@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/skvoch/burst/internal/app/store/psqlstore"
@@ -20,6 +21,7 @@ func Start(config *Config) error {
 	store := psqlstore.New(db)
 	server := newServer(store)
 
+	log.Println("Starting HTTP server on", config.BindAddr, "...")
 	return http.ListenAndServe(config.BindAddr, server)
 }
 
