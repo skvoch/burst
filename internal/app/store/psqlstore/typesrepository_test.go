@@ -1,4 +1,4 @@
-package store_test
+package psqlstore_test
 
 import (
 	"testing"
@@ -6,13 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/skvoch/burst/internal/app/model"
-	"github.com/skvoch/burst/internal/app/store"
+	"github.com/skvoch/burst/internal/app/store/psqlstore"
 )
 
 func TestTypeRepository_Create(t *testing.T) {
-	s, teardown := store.TestStore(t, databaseURL)
+	db, teardown := psqlstore.TestDB(t, databaseURL)
 	defer teardown("types")
 
+	s := psqlstore.New(db)
 	repo := s.Types()
 
 	_type := &model.Type{
@@ -25,9 +26,10 @@ func TestTypeRepository_Create(t *testing.T) {
 }
 
 func TestTypeRepository_GetAll(t *testing.T) {
-	s, teardown := store.TestStore(t, databaseURL)
+	db, teardown := psqlstore.TestDB(t, databaseURL)
 	defer teardown("types")
 
+	s := psqlstore.New(db)
 	repo := s.Types()
 
 	_type := &model.Type{

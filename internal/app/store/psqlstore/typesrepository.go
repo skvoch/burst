@@ -1,4 +1,4 @@
-package store
+package psqlstore
 
 import (
 	"github.com/skvoch/burst/internal/app/model"
