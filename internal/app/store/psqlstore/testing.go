@@ -1,4 +1,4 @@
-package store
+package psqlstore
 
 import (
 	"database/sql"
@@ -22,7 +22,7 @@ func TestDB(t *testing.T, databaseURL string) (*sql.DB, func(...string)) {
 
 	return db, func(tabels ...string) {
 		if len(tabels) > 0 {
-			db.Exec("TRUNCATE %s CASCADE", strings.Join(tabels, ","))
+			db.Exec("TRUNCATE TABLE %s CASCADE;", strings.Join(tabels, ","))
 		}
 
 		db.Close()

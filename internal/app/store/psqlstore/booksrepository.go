@@ -1,8 +1,6 @@
-package store
+package psqlstore
 
-import (
-	"github.com/skvoch/burst/internal/app/model"
-)
+import "github.com/skvoch/burst/internal/app/model"
 
 // BooksRepository ...
 type BooksRepository struct {
@@ -27,7 +25,7 @@ func (b *BooksRepository) Create(book *model.Book) error {
 
 // GetByType ...
 func (b *BooksRepository) GetByType(_type *model.Type) ([]*model.Book, error) {
-	
+
 	rows, err := b.store.db.Query(
 		"SELECT id, name, description, review, rating, type FROM books WHERE type = $1",
 		_type.ID,
@@ -41,9 +39,9 @@ func (b *BooksRepository) GetByType(_type *model.Type) ([]*model.Book, error) {
 
 	for rows.Next() {
 		book := &model.Book{}
-		
+
 		err := rows.Scan(&book.ID, &book.Name, &book.Description, &book.Review, &book.Rating, &book.Type)
-		
+
 		if err != nil {
 			return nil, err
 		}
