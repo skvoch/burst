@@ -1,4 +1,4 @@
-package store 
+package store
 
 import (
 	"github.com/skvoch/burst/internal/app/model"
@@ -39,8 +39,6 @@ func (t *TypesRepository) GetAll() ([]*model.Type, error) {
 
 		types = append(types, _type)
 	}
-	
+
 	return types, nil
 }
-
-

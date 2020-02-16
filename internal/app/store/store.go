@@ -75,7 +75,7 @@ func (s *Store) Types() *TypesRepository {
 		return s.typesRepository
 	}
 
-	s.typesRepository = &TypesRepository {
+	s.typesRepository = &TypesRepository{
 		store: s,
 	}
 
