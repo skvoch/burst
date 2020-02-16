@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	_ "github.com/lib/pq" // ...
+	"github.com/skvoch/burst/internal/app/store"
 )
 
 // Store ...
@@ -34,7 +35,7 @@ func (s *Store) getSourceName() string {
 */
 
 // Books ...
-func (s *Store) Books() *BooksRepository {
+func (s *Store) Books() store.BooksRepository {
 	if s.booksRepository != nil {
 		return s.booksRepository
 	}
@@ -47,7 +48,7 @@ func (s *Store) Books() *BooksRepository {
 }
 
 // Types ...
-func (s *Store) Types() *TypesRepository {
+func (s *Store) Types() store.TypesRepository {
 	if s.typesRepository != nil {
 		return s.typesRepository
 	}
