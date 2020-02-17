@@ -9,6 +9,15 @@ type TypesRepository struct {
 	store *Store
 }
 
+// RemoveAll ...
+func (b *TypesRepository) RemoveAll() error {
+	if _, err := b.store.db.Query("TRUNCATE TABLE types CASCADE;"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Create ...
 func (t *TypesRepository) Create(_type *model.Type) error {
 	if err := t.store.db.QueryRow(

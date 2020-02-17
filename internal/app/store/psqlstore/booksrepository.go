@@ -7,6 +7,15 @@ type BooksRepository struct {
 	store *Store
 }
 
+// RemoveAll ...
+func (b *BooksRepository) RemoveAll() error {
+	if _, err := b.store.db.Query("RUNCATE TABLE books CASCADE;"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Create ...
 func (b *BooksRepository) Create(book *model.Book) error {
 	if err := b.store.db.QueryRow(
