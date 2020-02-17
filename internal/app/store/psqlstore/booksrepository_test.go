@@ -14,6 +14,7 @@ func TestBooksRepository_GetByType(t *testing.T) {
 	defer teardown("books", "types")
 
 	s := psqlstore.New(db)
+	s.Books().RemoveAll()
 
 	typeFirst := &model.Type{
 		ID:   0,

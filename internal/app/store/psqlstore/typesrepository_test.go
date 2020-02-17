@@ -30,7 +30,10 @@ func TestTypeRepository_GetAll(t *testing.T) {
 	defer teardown("types")
 
 	s := psqlstore.New(db)
+	s.Books().RemoveAll()
+
 	repo := s.Types()
+	repo.RemoveAll()
 
 	_type := &model.Type{
 		ID:   0,
