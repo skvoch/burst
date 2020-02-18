@@ -27,16 +27,16 @@ func TestBooksRepository_GetByType(t *testing.T) {
 	s.Types().Create(typeSecond)
 
 	for i := 0; i < 10; i++ {
-		book1 := model.NewTestBook()
+		bookFirst := model.NewTestBook()
 
-		book1.Type = typeFirst.ID
-		err := s.Books().Create(book1)
+		bookFirst.Type = typeFirst.ID
+		err := s.Books().Create(bookFirst)
 		assert.NoError(t, err)
 
-		book2 := model.NewTestBook()
+		bookSecond := model.NewTestBook()
 
-		book2.Type = typeSecond.ID
-		err = s.Books().Create(book2)
+		bookSecond.Type = typeSecond.ID
+		err = s.Books().Create(bookSecond)
 		assert.NoError(t, err)
 	}
 
