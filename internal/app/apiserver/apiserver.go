@@ -2,9 +2,9 @@ package apiserver
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 
+	"github.com/sirupsen/logrus"
 	"github.com/skvoch/burst/internal/app/store/psqlstore"
 )
 
@@ -12,16 +12,16 @@ import (
 func Start(config *Config) error {
 
 	db, err := newDB(config.DataBaseURL)
-
+	log := logrus.New()
 	if err != nil {
 		return err
 	}
 
 	defer db.Close()
 	store := psqlstore.New(db)
-	server := newServer(store)
+	server := newServer(store, log)
 
-	log.Println("Starting HTTP server on", config.BindAddr, "...")
+	log.Info("Starting HTTP server on", config.BindAddr, "...")
 	return http.ListenAndServe(config.BindAddr, server)
 }
 

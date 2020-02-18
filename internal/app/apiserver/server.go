@@ -2,7 +2,6 @@ package apiserver
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -17,10 +16,10 @@ type server struct {
 	log    *logrus.Logger
 }
 
-func newServer(store store.Store) *server {
+func newServer(store store.Store, log *logrus.Logger) *server {
 	s := &server{
 		router: mux.NewRouter(),
-		log:    logrus.New(),
+		log:    log,
 		store:  store,
 	}
 
@@ -34,9 +33,16 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) configureRouter() {
-	log.Println("CONFIGURE")
+
 	s.router.HandleFunc("/types/", s.handleTypesGet()).Methods("GET")
 	s.router.HandleFunc("/books/", s.handleBooksGet()).Methods("GET")
+	s.log.Info("Endpoints:")
+	s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+		tpl, err1 := route.GetPathTemplate()
+		met, err2 := route.GetMethods()
+		s.log.Info(tpl, err1, met, err2)
+		return nil
+	})
 }
 
 func (s *server) handleTypesGet() http.HandlerFunc {
