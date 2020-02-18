@@ -31,5 +31,11 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) configureRouter() {
+	s.router.HandleFunc("/types", s.handleTypesGet()).Methods("GET")
+}
 
+func (s *server) handleTypesGet() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+	}
 }
