@@ -1,7 +1,7 @@
 package telegramserver
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/Syfaro/telegram-bot-api"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,6 +19,7 @@ func New(config *Config) *TelegramServer {
 }
 
 func (t *TelegramServer) Start() {
+	t.log.Info("im here :)")
 	tgbot, err := tgbotapi.NewBotAPI(t.config.ApplicationToken)
 
 	if err != nil {
