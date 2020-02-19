@@ -1,13 +1,23 @@
 package apiserver
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/skvoch/burst/internal/app/model"
 	"github.com/skvoch/burst/internal/app/store"
+)
+
+type ctxKey int8
+
+const (
+	ctxKeyRequestID ctxKey = iota
 )
 
 type server struct {
@@ -33,15 +43,45 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) configureRouter() {
+	s.router.Use(s.setRequestID)
+	s.router.Use(s.logRequest)
+	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
+	s.router.HandleFunc("/types", s.handleTypesGet()).Methods("GET")
+	s.router.HandleFunc("/books", s.handleBooksGet()).Methods("GET")
 
-	s.router.HandleFunc("/types/", s.handleTypesGet()).Methods("GET")
-	s.router.HandleFunc("/books/", s.handleBooksGet()).Methods("GET")
 	s.log.Info("Endpoints:")
 	s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err1 := route.GetPathTemplate()
 		met, err2 := route.GetMethods()
 		s.log.Info(tpl, err1, met, err2)
 		return nil
+	})
+}
+
+func (s *server) setRequestID(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := uuid.New().String()
+		w.Header().Set("X-request-ID", id)
+
+		ctx := r.Context()
+		next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, ctxKeyRequestID, id)))
+	})
+}
+
+func (s *server) logRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger := s.log.WithFields(logrus.Fields{
+			"remote_addr": r.RemoteAddr,
+			"request_id":  r.Context().Value(ctxKeyRequestID),
+		})
+
+		logger.Infof("started %s, %s", r.Method, r.RequestURI)
+
+		start := time.Now()
+		next.ServeHTTP(w, r)
+
+		logger.Infof("finished time %v ", time.Now().Sub(start))
+
 	})
 }
 
