@@ -14,6 +14,13 @@ func (p *PDFTokenRepository) Create(token *model.PDFToken) error {
 	return nil
 }
 
+func (p *PDFTokenRepository) RemoveAll() error {
+
+	p.tokens = make(map[string]*model.PDFToken)
+
+	return nil
+}
+
 // GetByUID
 func (p *PDFTokenRepository) GetByUID(uid string) (*model.PDFToken, error) {
 	return p.tokens[uid], nil
@@ -46,6 +53,13 @@ func (p *PreviewTokenRepository) GetByUID(uid string) (*model.PreviewToken, erro
 // Remove
 func (p *PreviewTokenRepository) Remove(token *model.PreviewToken) error {
 	p.tokens[token.UID] = nil
+
+	return nil
+}
+
+func (p *PreviewTokenRepository) RemoveAll() error {
+
+	p.tokens = make(map[string]*model.PreviewToken)
 
 	return nil
 }

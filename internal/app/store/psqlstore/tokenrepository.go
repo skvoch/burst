@@ -9,9 +9,8 @@ type PDFTokenRepository struct {
 // Create ...
 func (p *PDFTokenRepository) Create(token *model.PDFToken) error {
 	if err := p.store.db.QueryRow(
-		"INSERT INTO pdf_tokens (uid, bookID) VALUES ($1, $2) RETURNING uid",
+		"INSERT INTO pdf_tokens (uid, bookID) VALUES ($1, $2) RETURNING uid ",
 		token.UID,
-		token.BookID,
 	).Scan(token.UID); err != nil {
 		return err
 	}
@@ -39,6 +38,15 @@ func (p *PDFTokenRepository) GetByUID(uid string) (*model.PDFToken, error) {
 func (p *PDFTokenRepository) Remove(token *model.PDFToken) error {
 
 	return p.store.db.QueryRow("DELETE FROM pdf_tokens WHERE uid = $1;", token.UID).Scan()
+}
+
+// RemoveAll ...
+func (p *PDFTokenRepository) RemoveAll() error {
+	if _, err := p.store.db.Query("TRUNCATE TABLE pdf_tokens CASCADE;"); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type PreviewTokenRepository struct {
@@ -78,4 +86,13 @@ func (p *PreviewTokenRepository) GetByUID(uid string) (*model.PreviewToken, erro
 func (p *PreviewTokenRepository) Remove(token *model.PreviewToken) error {
 
 	return p.store.db.QueryRow("DELETE FROM preview_tokens WHERE uid = $1;", token.UID).Scan()
+}
+
+// RemoveAll ...
+func (p *PreviewTokenRepository) RemoveAll() error {
+	if _, err := p.store.db.Query("RUNCATE TABLE preview_tokens CASCADE;"); err != nil {
+		return err
+	}
+
+	return nil
 }

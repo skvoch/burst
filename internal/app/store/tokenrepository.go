@@ -7,6 +7,7 @@ type PDFTokenRepository interface {
 	Create(b *model.PDFToken) error
 	GetByUID(UID string) (*model.PDFToken, error)
 	Remove(t *model.PDFToken) error
+	RemoveAll() error
 }
 
 // PDFTokenRepository ...
@@ -14,4 +15,5 @@ type PreviewTokenRepository interface {
 	Create(b *model.PreviewToken) error
 	GetByUID(UID string) (*model.PreviewToken, error)
 	Remove(t *model.PreviewToken) error
+	RemoveAll() error
 }
