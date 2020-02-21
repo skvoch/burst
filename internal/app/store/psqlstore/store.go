@@ -9,9 +9,11 @@ import (
 
 // Store ...
 type Store struct {
-	db              *sql.DB
-	booksRepository *BooksRepository
-	typesRepository *TypesRepository
+	db                     *sql.DB
+	booksRepository        *BooksRepository
+	typesRepository        *TypesRepository
+	pdfTokenRepository     *PDFTokenRepository
+	previewTokenRepository *PreviewTokenRepository
 }
 
 // New ...
@@ -58,4 +60,28 @@ func (s *Store) Types() store.TypesRepository {
 	}
 
 	return s.typesRepository
+}
+
+func (s *Store) TokensPDF() store.PDFTokenRepository {
+	if s.pdfTokenRepository != nil {
+		return s.pdfTokenRepository
+	}
+
+	s.pdfTokenRepository = &PDFTokenRepository{
+		store: s,
+	}
+
+	return s.pdfTokenRepository
+}
+
+func (s *Store) TokensPreview() store.PreviewTokenRepository {
+	if s.previewTokenRepository != nil {
+		return s.previewTokenRepository
+	}
+
+	s.previewTokenRepository = &PreviewTokenRepository{
+		store: s,
+	}
+
+	return s.previewTokenRepository
 }
