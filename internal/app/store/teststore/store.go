@@ -7,8 +7,10 @@ import (
 
 // Store ...
 type Store struct {
-	booksRepository *BooksRepository
-	typesRepository *TypesRepository
+	booksRepository        *BooksRepository
+	typesRepository        *TypesRepository
+	pdfTokenRepository     *PDFTokenRepository
+	previewTokenRepository *PreviewTokenRepository
 }
 
 // New ...
@@ -40,4 +42,28 @@ func (s *Store) Types() store.TypesRepository {
 	}
 
 	return s.typesRepository
+}
+
+func (s *Store) TokensPDF() store.PDFTokenRepository {
+	if s.pdfTokenRepository != nil {
+		return s.pdfTokenRepository
+	}
+
+	s.pdfTokenRepository = &PDFTokenRepository{
+		tokens: make(map[string]*model.PDFToken),
+	}
+
+	return s.pdfTokenRepository
+}
+
+func (s *Store) TokensPreview() store.PreviewTokenRepository {
+	if s.previewTokenRepository != nil {
+		return s.previewTokenRepository
+	}
+
+	s.previewTokenRepository = &PreviewTokenRepository{
+		tokens: make(map[string]*model.PreviewToken),
+	}
+
+	return s.previewTokenRepository
 }
