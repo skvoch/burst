@@ -46,8 +46,8 @@ func (s *server) configureRouter() {
 	s.router.Use(s.setRequestID)
 	s.router.Use(s.logRequest)
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
-	s.router.HandleFunc("/types", s.handleTypesGet()).Methods("GET")
-	s.router.HandleFunc("/books", s.handleBooksGet()).Methods("GET")
+
+	s.router.HandleFunc("/v1.0/books/create", s.handleCreateBook()).Methods("POST")
 
 	s.log.Info("Endpoints:")
 	s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
@@ -83,6 +83,46 @@ func (s *server) logRequest(next http.Handler) http.Handler {
 		logger.Infof("finished time %v ", time.Now().Sub(start))
 
 	})
+}
+
+func (s *server) handleCreateBook() http.HandlerFunc {
+
+	type Response struct {
+		FileUUID    string `file_uuid:"id"`
+		PreviewUUID string `preview_uuid:"id"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		book := &model.Book{}
+
+		if err := json.NewDecoder(r.Body).Decode(book); err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
+		}
+
+		book.Sanitaize()
+
+		if err := s.store.Books().Create(book); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
+		fileToken := &model.PDFToken{UID: uuid.New().String(), BookID: book.ID}
+		previewToken := &model.PreviewToken{UID: uuid.New().String(), BookID: book.ID}
+
+		if err := s.store.TokensPDF().Create(fileToken); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
+		if err := s.store.TokensPreview().Create(previewToken); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
+		response := &Response{
+			FileUUID:    fileToken.UID,
+			PreviewUUID: previewToken.UID,
+		}
+
+		s.respond(w, r, http.StatusCreated, response)
+	}
 }
 
 func (s *server) handleTypesGet() http.HandlerFunc {

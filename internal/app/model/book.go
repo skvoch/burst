@@ -11,3 +11,8 @@ type Book struct {
 	FilePath    string `json:"file_path"`
 	PreviewPath string `json:"preview_path"`
 }
+
+func (b *Book) Sanitaize() {
+	b.FilePath = ""
+	b.PreviewPath = ""
+}
