@@ -11,7 +11,8 @@ func (p *PDFTokenRepository) Create(token *model.PDFToken) error {
 	if err := p.store.db.QueryRow(
 		"INSERT INTO pdf_tokens (uid, bookID) VALUES ($1, $2) RETURNING uid ",
 		token.UID,
-	).Scan(token.UID); err != nil {
+		token.BookID,
+	).Scan(&token.UID); err != nil {
 		return err
 	}
 
@@ -36,17 +37,16 @@ func (p *PDFTokenRepository) GetByUID(uid string) (*model.PDFToken, error) {
 
 // Remove
 func (p *PDFTokenRepository) Remove(token *model.PDFToken) error {
+	_, err := p.store.db.Exec("DELETE FROM pdf_tokens WHERE uid = $1;", token.UID)
 
-	return p.store.db.QueryRow("DELETE FROM pdf_tokens WHERE uid = $1;", token.UID).Scan()
+	return err
 }
 
 // RemoveAll ...
 func (p *PDFTokenRepository) RemoveAll() error {
-	if _, err := p.store.db.Query("TRUNCATE TABLE pdf_tokens CASCADE;"); err != nil {
-		return err
-	}
+	_, err := p.store.db.Exec("TRUNCATE TABLE pdf_tokens CASCADE;")
 
-	return nil
+	return err
 }
 
 type PreviewTokenRepository struct {
@@ -59,7 +59,7 @@ func (p *PreviewTokenRepository) Create(token *model.PreviewToken) error {
 		"INSERT INTO preview_tokens (uid, bookID) VALUES ($1, $2) RETURNING uid",
 		token.UID,
 		token.BookID,
-	).Scan(token.UID); err != nil {
+	).Scan(&token.UID); err != nil {
 		return err
 	}
 
@@ -72,7 +72,7 @@ func (p *PreviewTokenRepository) GetByUID(uid string) (*model.PreviewToken, erro
 
 	err := p.store.db.QueryRow(
 		"SELECT uid, bookID FROM preview_tokens WHERE uid = $1;",
-		uid,
+		&uid,
 	).Scan(&token.UID, &token.BookID)
 
 	if err != nil {
@@ -85,14 +85,13 @@ func (p *PreviewTokenRepository) GetByUID(uid string) (*model.PreviewToken, erro
 // Remove
 func (p *PreviewTokenRepository) Remove(token *model.PreviewToken) error {
 
-	return p.store.db.QueryRow("DELETE FROM preview_tokens WHERE uid = $1;", token.UID).Scan()
+	_, err := p.store.db.Exec("DELETE FROM preview_tokens WHERE uid = $1;", token.UID)
+	return err
 }
 
 // RemoveAll ...
 func (p *PreviewTokenRepository) RemoveAll() error {
-	if _, err := p.store.db.Query("RUNCATE TABLE preview_tokens CASCADE;"); err != nil {
-		return err
-	}
 
-	return nil
+	_, err := p.store.db.Query("TRUNCATE TABLE preview_tokens CASCADE;")
+	return err
 }
