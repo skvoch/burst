@@ -72,3 +72,25 @@ func (b *BooksRepository) GetByType(_type *model.Type) ([]*model.Book, error) {
 
 	return books, nil
 }
+
+// GetByID ...
+func (b *BooksRepository) GetByID(ID int) (*model.Book, error) {
+
+	book := &model.Book{}
+	if err := b.store.db.QueryRow(
+		"SELECT id, name, description, review, rating,file_path, preview_path, type FROM books WHERE id = $1",
+		ID,
+	).Scan(&book.ID,
+		&book.Name,
+		&book.Description,
+		&book.Review,
+		&book.Rating,
+		&book.FilePath,
+		&book.PreviewPath,
+		&book.Type); err != nil {
+		return nil, err
+	}
+
+	return book, nil
+
+}

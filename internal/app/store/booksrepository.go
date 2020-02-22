@@ -6,5 +6,6 @@ import "github.com/skvoch/burst/internal/app/model"
 type BooksRepository interface {
 	Create(b *model.Book) error
 	GetByType(t *model.Type) ([]*model.Book, error)
+	GetByID(ID int) (*model.Book, error)
 	RemoveAll() error
 }

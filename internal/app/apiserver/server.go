@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -48,6 +49,7 @@ func (s *server) configureRouter() {
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
 
 	s.router.HandleFunc("/v1.0/books/create", s.handleCreateBook()).Methods("POST")
+	s.router.HandleFunc("/v1.0/books/{id}", s.handleCreateBook()).Methods("POST")
 
 	s.log.Info("Endpoints:")
 	s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
@@ -125,6 +127,31 @@ func (s *server) handleCreateBook() http.HandlerFunc {
 	}
 }
 
+func (s *server) handleGetBook() http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		ID, err := strconv.Atoi(vars["ID"])
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
+		book, err := s.store.Books().GetByID(ID)
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+
+		}
+
+		if book == nil {
+			s.error(w, r, http.StatusNotFound, err)
+		}
+
+		s.respond(w, r, http.StatusOK, book)
+	}
+}
+
 func (s *server) handleTypesGet() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -136,27 +163,6 @@ func (s *server) handleTypesGet() http.HandlerFunc {
 		}
 
 		s.respond(w, r, http.StatusOK, types)
-	}
-}
-
-func (s *server) handleBooksGet() http.HandlerFunc {
-
-	return func(w http.ResponseWriter, r *http.Request) {
-		_type := &model.Type{}
-
-		if err := json.NewDecoder(r.Body).Decode(_type); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
-			return
-		}
-
-		books, err := s.store.Books().GetByType(_type)
-
-		if err != nil {
-			s.error(w, r, http.StatusInternalServerError, err)
-			return
-		}
-
-		s.respond(w, r, http.StatusOK, books)
 	}
 }
 

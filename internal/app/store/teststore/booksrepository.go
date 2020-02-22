@@ -36,3 +36,14 @@ func (b *BooksRepository) GetByType(_type *model.Type) ([]*model.Book, error) {
 
 	return result, nil
 }
+
+func (b *BooksRepository) GetByID(ID int) (*model.Book, error) {
+
+	for _, book := range b.books {
+		if book.ID == ID {
+			return book, nil
+		}
+	}
+
+	return nil, nil
+}
