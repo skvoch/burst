@@ -3,7 +3,9 @@ package apiserver
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -48,8 +50,10 @@ func (s *server) configureRouter() {
 	s.router.Use(s.logRequest)
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
 
-	s.router.HandleFunc("/v1.0/books/create", s.handleCreateBook()).Methods("POST")
-	s.router.HandleFunc("/v1.0/books/{id}", s.handleCreateBook()).Methods("POST")
+	s.router.HandleFunc("/v1.0/books/create/", s.handleCreateBook()).Methods("POST")
+	s.router.HandleFunc("/v1.0/books/{id}/", s.handleGetBookByID()).Methods("GET")
+	s.router.HandleFunc("/v1.0/books/{id}/preview/", s.handleBookPreview()).Methods("GET")
+	s.router.HandleFunc("/v1.0/books/{id}/file/", s.handleBookFile()).Methods("GET")
 
 	s.log.Info("Endpoints:")
 	s.router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
@@ -127,7 +131,7 @@ func (s *server) handleCreateBook() http.HandlerFunc {
 	}
 }
 
-func (s *server) handleGetBook() http.HandlerFunc {
+func (s *server) handleGetBookByID() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -152,6 +156,69 @@ func (s *server) handleGetBook() http.HandlerFunc {
 	}
 }
 
+func (s *server) handleBookPreview() http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		ID, err := strconv.Atoi(vars["ID"])
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
+		book, err := s.store.Books().GetByID(ID)
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+
+		}
+
+		if book == nil {
+			s.error(w, r, http.StatusNotFound, err)
+		}
+
+		previewPath := book.PreviewPath
+		file, err := os.Open(previewPath)
+
+		if err != nil {
+			s.error(w, r, http.StatusNotFound, err)
+		}
+
+		s.respondFile(w, r, previewPath, file)
+	}
+}
+func (s *server) handleBookFile() http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		ID, err := strconv.Atoi(vars["ID"])
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
+		book, err := s.store.Books().GetByID(ID)
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+
+		}
+
+		if book == nil {
+			s.error(w, r, http.StatusNotFound, err)
+		}
+
+		filePath := book.FilePath
+		file, err := os.Open(filePath)
+
+		if err != nil {
+			s.error(w, r, http.StatusNotFound, err)
+		}
+
+		s.respondFile(w, r, filePath, file)
+	}
+}
+
 func (s *server) handleTypesGet() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -164,6 +231,14 @@ func (s *server) handleTypesGet() http.HandlerFunc {
 
 		s.respond(w, r, http.StatusOK, types)
 	}
+}
+
+func (s *server) respondFile(w http.ResponseWriter, r *http.Request, name string, data io.ReadSeeker) {
+
+	modtime := time.Now()
+	w.Header().Add("Content-Disposition", "Attachment")
+
+	http.ServeContent(w, r, name, modtime, data)
 }
 
 func (s *server) error(w http.ResponseWriter, r *http.Request, code int, err error) {
