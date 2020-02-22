@@ -1,6 +1,7 @@
 package psqlstore_test
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +15,10 @@ func TestBooksRepository_GetByType(t *testing.T) {
 	defer teardown("books", "types")
 
 	s := psqlstore.New(db)
-	s.Books().RemoveAll()
+
+	if err := s.Books().RemoveAll(); err != nil {
+		assert.NoError(t, err)
+	}
 
 	typeFirst := &model.Type{
 		ID:   0,
@@ -40,10 +44,14 @@ func TestBooksRepository_GetByType(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		book.Type = typeFirst.ID
+		book.FilePath = strconv.Itoa(i) + "first"
+		book.PreviewPath = strconv.Itoa(i) + "first"
 		err := s.Books().Create(book)
 		assert.NoError(t, err)
 
 		book.Type = typeSecond.ID
+		book.FilePath = strconv.Itoa(i) + "second"
+		book.PreviewPath = strconv.Itoa(i) + "second"
 		err = s.Books().Create(book)
 		assert.NoError(t, err)
 	}

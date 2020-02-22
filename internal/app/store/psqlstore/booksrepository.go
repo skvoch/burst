@@ -9,7 +9,7 @@ type BooksRepository struct {
 
 // RemoveAll ...
 func (b *BooksRepository) RemoveAll() error {
-	if _, err := b.store.db.Query("RUNCATE TABLE books CASCADE;"); err != nil {
+	if _, err := b.store.db.Query("TRUNCATE TABLE books CASCADE;"); err != nil {
 		return err
 	}
 
@@ -19,11 +19,13 @@ func (b *BooksRepository) RemoveAll() error {
 // Create ...
 func (b *BooksRepository) Create(book *model.Book) error {
 	if err := b.store.db.QueryRow(
-		"INSERT INTO books (name, description, review, rating, type) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO books (name, description, review, rating, file_path, preview_path, type) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
 		book.Name,
 		book.Description,
 		book.Review,
 		book.Rating,
+		book.FilePath,
+		book.PreviewPath,
 		book.Type,
 	).Scan(&book.ID); err != nil {
 		return err
@@ -36,7 +38,7 @@ func (b *BooksRepository) Create(book *model.Book) error {
 func (b *BooksRepository) GetByType(_type *model.Type) ([]*model.Book, error) {
 
 	rows, err := b.store.db.Query(
-		"SELECT id, name, description, review, rating, type FROM books WHERE type = $1",
+		"SELECT id, name, description, review, rating,file_path, preview_path, type FROM books WHERE type = $1",
 		_type.ID,
 	)
 
@@ -49,7 +51,14 @@ func (b *BooksRepository) GetByType(_type *model.Type) ([]*model.Book, error) {
 	for rows.Next() {
 		book := &model.Book{}
 
-		err := rows.Scan(&book.ID, &book.Name, &book.Description, &book.Review, &book.Rating, &book.Type)
+		err := rows.Scan(&book.ID,
+			&book.Name,
+			&book.Description,
+			&book.Review,
+			&book.Rating,
+			&book.FilePath,
+			&book.PreviewPath,
+			&book.Type)
 
 		if err != nil {
 			return nil, err
