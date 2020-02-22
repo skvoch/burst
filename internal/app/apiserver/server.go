@@ -24,9 +24,10 @@ const (
 )
 
 type server struct {
-	router *mux.Router
-	store  store.Store
-	log    *logrus.Logger
+	router    *mux.Router
+	store     store.Store
+	log       *logrus.Logger
+	assetPath string
 }
 
 func newServer(store store.Store, log *logrus.Logger) *server {
@@ -49,6 +50,10 @@ func (s *server) configureRouter() {
 	s.router.Use(s.setRequestID)
 	s.router.Use(s.logRequest)
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
+
+	s.router.HandleFunc("/v1.0/types/", s.handleTypesGet()).Methods("GET")
+	s.router.HandleFunc("/v1.0/types/create/", s.handleTypesGet()).Methods("POST")
+	s.router.HandleFunc("/v1.0/types/books_ids/", s.handleTypesGet()).Methods("GET")
 
 	s.router.HandleFunc("/v1.0/books/create/", s.handleCreateBook()).Methods("POST")
 	s.router.HandleFunc("/v1.0/books/{id}/", s.handleGetBookByID()).Methods("GET")
@@ -216,6 +221,24 @@ func (s *server) handleBookFile() http.HandlerFunc {
 		}
 
 		s.respondFile(w, r, filePath, file)
+	}
+}
+
+func (s *server) handleCreateType() http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		_type := &model.Type{}
+
+		if err := json.NewDecoder(r.Body).Decode(_type); err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
+		}
+
+		if err := s.store.Types().Create(_type); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
+		s.respond(w, r, http.StatusOK, nil)
 	}
 }
 
