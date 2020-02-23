@@ -56,6 +56,7 @@ func (s *server) configureRouter() {
 	s.router.Use(s.logRequest)
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
 
+	s.router.HandleFunc("/v1.0/ping/", s.handlePing()).Methods("GET")
 	s.router.HandleFunc("/v1.0/types/", s.handleTypesGet()).Methods("GET")
 	s.router.HandleFunc("/v1.0/types/create/", s.handleCreateType()).Methods("POST")
 	s.router.HandleFunc("/v1.0/types/{id}/books/", s.handleGetBooksIDs()).Methods("GET")
@@ -103,6 +104,12 @@ func (s *server) logRequest(next http.Handler) http.Handler {
 		logger.Infof("finished time %v ", time.Now().Sub(start))
 
 	})
+}
+
+func (s *server) handlePing() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		s.respond(w, r, http.StatusOK, nil)
+	}
 }
 
 func (s *server) handleCreateBook() http.HandlerFunc {
