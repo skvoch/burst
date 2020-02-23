@@ -89,7 +89,7 @@ func TestBooksRepository_UpdatePreviewPath(t *testing.T) {
 	err := s.Books().Create(book)
 	assert.NoError(t, err)
 
-	err = s.Books().UpdatedPreviewPath(book.ID, dstPreviewPath)
+	err = s.Books().UpdatePreviewPath(book.ID, dstPreviewPath)
 	assert.NoError(t, err)
 
 	foundBook, err := s.Books().GetByID(book.ID)
@@ -121,7 +121,7 @@ func TestBooksRepository_UpdateFilePath(t *testing.T) {
 	err := s.Books().Create(book)
 	assert.NoError(t, err)
 
-	err = s.Books().UpdatedFilePath(book.ID, dstFilePath)
+	err = s.Books().UpdateFilePath(book.ID, dstFilePath)
 	assert.NoError(t, err)
 
 	foundBook, err := s.Books().GetByID(book.ID)

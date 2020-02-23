@@ -61,10 +61,10 @@ func (s *server) configureRouter() {
 	s.router.HandleFunc("/v1.0/books/create/", s.handleCreateBook()).Methods("POST")
 	s.router.HandleFunc("/v1.0/books/{id}/", s.handleGetBookByID()).Methods("GET")
 
-	s.router.HandleFunc("/v1.0/books/{id}/preview/", s.handleBookFile()).Methods("POST")
+	s.router.HandleFunc("/v1.0/books/{id}/preview/", s.handleBookPreviewUpload()).Methods("POST")
 	s.router.HandleFunc("/v1.0/books/{id}/preview/", s.handleBookPreview()).Methods("GET")
 
-	s.router.HandleFunc("/v1.0/books/{id}/file/", s.handleBookFile()).Methods("POST")
+	s.router.HandleFunc("/v1.0/books/{id}/file/", s.handleBookFileUpload()).Methods("POST")
 	s.router.HandleFunc("/v1.0/books/{id}/file/", s.handleBookFile()).Methods("GET")
 
 	s.log.Info("Endpoints:")
@@ -205,7 +205,7 @@ func (s *server) handleBookPreviewUpload() http.HandlerFunc {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
-		if err := s.store.Books().UpdatedPreviewPath(token.BookID, fileName); err != nil {
+		if err := s.store.Books().UpdatePreviewPath(token.BookID, fileName); err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
@@ -277,6 +277,55 @@ func (s *server) handleBookFile() http.HandlerFunc {
 		}
 
 		s.respondFile(w, r, filePath, file)
+	}
+}
+
+func (s *server) handleBookFileUpload() http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		uuid := r.Header.Get("X-Token-UUID")
+
+		token, err := s.store.TokensPreview().GetByUID(uuid)
+
+		if token == nil {
+			s.error(w, r, http.StatusBadRequest, nil)
+			return
+		}
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		r.ParseMultipartForm(10 << 20)
+		file, handler, err := r.FormFile("file")
+
+		defer file.Close()
+
+		fileBytes, err := ioutil.ReadAll(file)
+		fileName := handler.Filename
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		savePath := s.assetPath + string(os.PathSeparator) + s.filesPath + string(os.PathSeparator) + fileName
+		err = ioutil.WriteFile(savePath, fileBytes, 0644)
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		if err := s.store.Books().UpdateFilePath(token.BookID, fileName); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		if err != s.store.TokensPreview().Remove(token) {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
 	}
 }
 

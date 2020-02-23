@@ -51,7 +51,7 @@ func (b *BooksRepository) GetByID(ID int) (*model.Book, error) {
 	return nil, nil
 }
 
-func (b *BooksRepository) UpdatedPreviewPath(ID int, path string) error {
+func (b *BooksRepository) UpdatePreviewPath(ID int, path string) error {
 
 	book := b.books[ID]
 
@@ -64,7 +64,7 @@ func (b *BooksRepository) UpdatedPreviewPath(ID int, path string) error {
 	return nil
 }
 
-func (b *BooksRepository) UpdatedFilePath(ID int, path string) error {
+func (b *BooksRepository) UpdateFilePath(ID int, path string) error {
 	book := b.books[ID]
 
 	if book == nil {

@@ -95,14 +95,14 @@ func (b *BooksRepository) GetByID(ID int) (*model.Book, error) {
 
 }
 
-func (b *BooksRepository) UpdatedPreviewPath(ID int, path string) error {
+func (b *BooksRepository) UpdatePreviewPath(ID int, path string) error {
 
 	_, err := b.store.db.Exec("UPDATE books SET preview_path = $1 WHERE id = $2;", path, ID)
 
 	return err
 }
 
-func (b *BooksRepository) UpdatedFilePath(ID int, path string) error {
+func (b *BooksRepository) UpdateFilePath(ID int, path string) error {
 
 	_, err := b.store.db.Exec("UPDATE books SET file_path = $1 WHERE id = $2;", path, ID)
 
