@@ -51,3 +51,16 @@ func (t *TypesRepository) GetAll() ([]*model.Type, error) {
 
 	return types, nil
 }
+
+// GetByID ...
+func (t *TypesRepository) GetByID(ID int) (*model.Type, error) {
+
+	_type := &model.Type{}
+	err := t.store.db.QueryRow("SELECT * FROM types WHERE id = $1", ID).Scan(&_type.ID, &_type.Name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return _type, nil
+}

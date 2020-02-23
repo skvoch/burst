@@ -53,7 +53,7 @@ func (s *server) configureRouter() {
 
 	s.router.HandleFunc("/v1.0/types/", s.handleTypesGet()).Methods("GET")
 	s.router.HandleFunc("/v1.0/types/create/", s.handleTypesGet()).Methods("POST")
-	s.router.HandleFunc("/v1.0/types/books_ids/", s.handleTypesGet()).Methods("GET")
+	s.router.HandleFunc("/v1.0/types/{id}/books/", s.handleTypesGet()).Methods("GET")
 
 	s.router.HandleFunc("/v1.0/books/create/", s.handleCreateBook()).Methods("POST")
 	s.router.HandleFunc("/v1.0/books/{id}/", s.handleGetBookByID()).Methods("GET")
@@ -99,8 +99,8 @@ func (s *server) logRequest(next http.Handler) http.Handler {
 func (s *server) handleCreateBook() http.HandlerFunc {
 
 	type Response struct {
-		FileUUID    string `file_uuid:"id"`
-		PreviewUUID string `preview_uuid:"id"`
+		FileUUID    string `json:"file_uuid"`
+		PreviewUUID string `json:"preview_uuid"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -253,6 +253,45 @@ func (s *server) handleTypesGet() http.HandlerFunc {
 		}
 
 		s.respond(w, r, http.StatusOK, types)
+	}
+}
+
+func (s *server) handleGetBooksIDs() http.HandlerFunc {
+
+	type Response struct {
+		BooksIDs []int `json:"books_ids"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, err := strconv.Atoi(vars["id"])
+
+		if err != nil {
+			s.error(w, r, http.StatusBadRequest, err)
+		}
+
+		_type, err := s.store.Types().GetByID(id)
+
+		if _type == nil {
+			s.error(w, r, http.StatusNotFound, nil)
+		}
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, nil)
+		}
+
+		books, err := s.store.Books().GetByType(_type)
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
+		response := Response{}
+		for _, book := range books {
+			response.BooksIDs = append(response.BooksIDs, book.ID)
+		}
+
+		s.respond(w, r, http.StatusOK, response)
 	}
 }
 

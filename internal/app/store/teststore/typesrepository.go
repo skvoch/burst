@@ -13,6 +13,11 @@ func (t *TypesRepository) RemoveAll() error {
 	return nil
 }
 
+func (t *TypesRepository) GetByID(id int) (*model.Type, error) {
+
+	return t.types[id], nil
+}
+
 // Create ...
 func (t *TypesRepository) Create(_type *model.Type) error {
 

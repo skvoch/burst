@@ -49,3 +49,26 @@ func TestTypeRepository_GetAll(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 10, len(types))
 }
+
+func TestTypeRepository_GetByID(t *testing.T) {
+	db, teardown := psqlstore.TestDB(t, databaseURL)
+	defer teardown("types")
+
+	s := psqlstore.New(db)
+	s.Books().RemoveAll()
+
+	repo := s.Types()
+	repo.RemoveAll()
+
+	_type := &model.Type{
+		ID:   0,
+		Name: "Nothing",
+	}
+
+	err := repo.Create(_type)
+	assert.NoError(t, err)
+	_typeFound, err := repo.GetByID(_type.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, _typeFound)
+
+}
