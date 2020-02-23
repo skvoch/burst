@@ -2,9 +2,11 @@ package apiserver
 
 // Config ...
 type Config struct {
-	BindAddr    string `toml:"bind_addr"`
-	LogLevel    string `toml:"log_level"`
-	DataBaseURL string `toml:"database_url"`
+	BindAddr          string `toml:"bind_addr"`
+	LogLevel          string `toml:"log_level"`
+	DataBaseURL       string `toml:"database_url"`
+	FilesDirectory    string `toml:"files_directory"`
+	PreviewsDirectory string `toml:"previews_directory"`
 }
 
 // NewConfig ...

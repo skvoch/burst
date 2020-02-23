@@ -25,19 +25,21 @@ const (
 )
 
 type server struct {
-	router      *mux.Router
-	store       store.Store
-	log         *logrus.Logger
-	assetPath   string
-	previewPath string
-	filesPath   string
+	router            *mux.Router
+	store             store.Store
+	log               *logrus.Logger
+	assetPath         string
+	previewsDirectory string
+	filesDirecotry    string
 }
 
-func newServer(store store.Store, log *logrus.Logger) *server {
+func newServer(store store.Store, log *logrus.Logger, previewsDirectory string, filesDirecotry string) *server {
 	s := &server{
-		router: mux.NewRouter(),
-		log:    log,
-		store:  store,
+		router:            mux.NewRouter(),
+		log:               log,
+		store:             store,
+		previewsDirectory: previewsDirectory,
+		filesDirecotry:    filesDirecotry,
 	}
 
 	s.configureRouter()
@@ -199,7 +201,7 @@ func (s *server) handleBookPreviewUpload() http.HandlerFunc {
 			return
 		}
 
-		savePath := s.assetPath + string(os.PathSeparator) + s.previewPath + string(os.PathSeparator) + fileName
+		savePath := s.assetPath + string(os.PathSeparator) + s.previewsDirectory + string(os.PathSeparator) + fileName
 		err = ioutil.WriteFile(savePath, fileBytes, 0644)
 
 		if err != nil {
@@ -311,7 +313,7 @@ func (s *server) handleBookFileUpload() http.HandlerFunc {
 			return
 		}
 
-		savePath := s.assetPath + string(os.PathSeparator) + s.filesPath + string(os.PathSeparator) + fileName
+		savePath := s.assetPath + string(os.PathSeparator) + s.filesDirecotry + string(os.PathSeparator) + fileName
 		err = ioutil.WriteFile(savePath, fileBytes, 0644)
 
 		if err != nil {

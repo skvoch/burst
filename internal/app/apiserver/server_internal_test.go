@@ -17,7 +17,7 @@ import (
 
 func TestServerHandleTypesCreateAndGet(t *testing.T) {
 	log := logrus.New()
-	s := newServer(teststore.New(), log)
+	s := newServer(teststore.New(), log, "", "")
 
 	types := make([]*model.Type, 0)
 
@@ -59,7 +59,7 @@ func TestServerHandleGetBooksIDs(t *testing.T) {
 	}
 
 	log := logrus.New()
-	s := newServer(teststore.New(), log)
+	s := newServer(teststore.New(), log, "", "")
 
 	s.store.Types().Create(&model.Type{ID: 0, Name: "Go books"})
 	s.store.Types().Create(&model.Type{ID: 1, Name: "C++ books"})
@@ -94,7 +94,7 @@ func TestServerHandleGetBooksIDs(t *testing.T) {
 func TestServerHandleCreateBook(t *testing.T) {
 
 	log := logrus.New()
-	s := newServer(teststore.New(), log)
+	s := newServer(teststore.New(), log, "", "")
 
 	_type := model.NewTestType()
 

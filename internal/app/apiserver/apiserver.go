@@ -19,7 +19,7 @@ func Start(config *Config) error {
 
 	defer db.Close()
 	store := psqlstore.New(db)
-	server := newServer(store, log)
+	server := newServer(store, log, config.PreviewsDirectory, config.FilesDirectory)
 
 	log.Info("Starting HTTP server on", config.BindAddr, "...")
 	return http.ListenAndServe(config.BindAddr, server)
