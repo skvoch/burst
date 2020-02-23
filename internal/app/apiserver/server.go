@@ -343,7 +343,7 @@ func (s *server) handleCreateType() http.HandlerFunc {
 			s.error(w, r, http.StatusInternalServerError, err)
 		}
 
-		s.respond(w, r, http.StatusOK, _type)
+		s.respond(w, r, http.StatusCreated, _type)
 	}
 }
 
