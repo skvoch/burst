@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/sirupsen/logrus"
@@ -49,4 +50,42 @@ func TestServerHandleTypesCreateAndGet(t *testing.T) {
 		assert.Equal(t, types[index].ID, foundTypes[index].ID)
 		assert.Equal(t, types[index].Name, foundTypes[index].Name)
 	}
+}
+
+func TestServerHandleGetBooksIDs(t *testing.T) {
+	type Response struct {
+		BooksIDs []int `json:"books_ids"`
+	}
+
+	log := logrus.New()
+	s := newServer(teststore.New(), log)
+
+	s.store.Types().Create(&model.Type{ID: 0, Name: "Go books"})
+	s.store.Types().Create(&model.Type{ID: 1, Name: "C++ books"})
+
+	s.store.Books().Create(model.NewTestBookWithType(0))
+	s.store.Books().Create(model.NewTestBookWithType(0))
+	s.store.Books().Create(model.NewTestBookWithType(0))
+	s.store.Books().Create(model.NewTestBookWithType(0))
+	s.store.Books().Create(model.NewTestBookWithType(0))
+
+	s.store.Books().Create(model.NewTestBookWithType(1))
+	s.store.Books().Create(model.NewTestBookWithType(1))
+	s.store.Books().Create(model.NewTestBookWithType(1))
+	s.store.Books().Create(model.NewTestBookWithType(1))
+	s.store.Books().Create(model.NewTestBookWithType(1))
+
+	check := func(t *testing.T, typeID int, expectedLength int) {
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, "/v1.0/types/"+strconv.Itoa(typeID)+"/books/", nil)
+		s.ServeHTTP(rec, req)
+		assert.Equal(t, rec.Code, http.StatusOK)
+
+		response := Response{}
+		json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.Equal(t, expectedLength, len(response.BooksIDs))
+	}
+
+	check(t, 0, 5)
+	check(t, 1, 5)
 }
