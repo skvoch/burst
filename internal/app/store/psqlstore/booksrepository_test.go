@@ -65,3 +65,67 @@ func TestBooksRepository_GetByType(t *testing.T) {
 	assert.Equal(t, 10, len(books))
 
 }
+
+func TestBooksRepository_UpdatePreviewPath(t *testing.T) {
+
+	db, teardown := psqlstore.TestDB(t, databaseURL)
+	defer teardown("books", "types")
+	s := psqlstore.New(db)
+
+	s.Books().RemoveAll()
+
+	typeFirst := &model.Type{
+		ID:   0,
+		Name: "Type first",
+	}
+
+	dstPreviewPath := "example/of/preview/path"
+
+	s.Types().Create(typeFirst)
+
+	book := model.NewTestBook()
+	book.Type = typeFirst.ID
+
+	err := s.Books().Create(book)
+	assert.NoError(t, err)
+
+	err = s.Books().UpdatedPreviewPath(book.ID, dstPreviewPath)
+	assert.NoError(t, err)
+
+	foundBook, err := s.Books().GetByID(book.ID)
+	assert.NoError(t, err)
+
+	assert.Equal(t, dstPreviewPath, foundBook.PreviewPath)
+}
+
+func TestBooksRepository_UpdateFilePath(t *testing.T) {
+
+	db, teardown := psqlstore.TestDB(t, databaseURL)
+	defer teardown("books", "types")
+	s := psqlstore.New(db)
+
+	s.Books().RemoveAll()
+
+	typeFirst := &model.Type{
+		ID:   0,
+		Name: "Type first",
+	}
+
+	dstFilePath := "example/of/file/path"
+
+	s.Types().Create(typeFirst)
+
+	book := model.NewTestBook()
+	book.Type = typeFirst.ID
+
+	err := s.Books().Create(book)
+	assert.NoError(t, err)
+
+	err = s.Books().UpdatedFilePath(book.ID, dstFilePath)
+	assert.NoError(t, err)
+
+	foundBook, err := s.Books().GetByID(book.ID)
+	assert.NoError(t, err)
+
+	assert.Equal(t, dstFilePath, foundBook.FilePath)
+}

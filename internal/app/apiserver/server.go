@@ -173,9 +173,9 @@ func (s *server) handleBookPreviewUpload() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		uuid := r.Header.Get("X-Token-UUID")
 
-		_type, err := s.store.TokensPreview().GetByUID(uuid)
+		token, err := s.store.TokensPreview().GetByUID(uuid)
 
-		if _type == nil {
+		if token == nil {
 			s.error(w, r, http.StatusBadRequest, nil)
 			return
 		}
@@ -186,7 +186,7 @@ func (s *server) handleBookPreviewUpload() http.HandlerFunc {
 		}
 
 		r.ParseMultipartForm(10 << 20)
-		file, handler, err := r.FormFile("previsew")
+		file, handler, err := r.FormFile("preview")
 
 		defer file.Close()
 
@@ -205,7 +205,15 @@ func (s *server) handleBookPreviewUpload() http.HandlerFunc {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
+		if err := s.store.Books().UpdatedPreviewPath(token.BookID, fileName); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
 
+		if err != s.store.TokensPreview().Remove(token) {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
 	}
 }
 

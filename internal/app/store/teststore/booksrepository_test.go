@@ -48,3 +48,53 @@ func TestBooksRepository_GetByType(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 10, len(books))
 }
+
+func TestBooksRepository_UpdateFilePath(t *testing.T) {
+	s := teststore.New()
+	s.Books().RemoveAll()
+
+	typeFirst := &model.Type{
+		ID:   0,
+		Name: "Type first",
+	}
+
+	dstFilePath := "example/of/file/path"
+
+	book := model.NewTestBook()
+
+	s.Types().Create(typeFirst)
+	s.Books().Create(book)
+
+	err := s.Books().UpdatedFilePath(book.ID, dstFilePath)
+	assert.NoError(t, err)
+
+	foundBook, err := s.Books().GetByID(book.ID)
+	assert.NoError(t, err)
+
+	assert.Equal(t, book.FilePath, foundBook.FilePath)
+}
+
+func TestBooksRepository_UpdatePreviewPath(t *testing.T) {
+	s := teststore.New()
+	s.Books().RemoveAll()
+
+	typeFirst := &model.Type{
+		ID:   0,
+		Name: "Type first",
+	}
+
+	dstPreviewPath := "example/of/preview/path"
+
+	book := model.NewTestBook()
+
+	s.Types().Create(typeFirst)
+	s.Books().Create(book)
+
+	err := s.Books().UpdatedPreviewPath(book.ID, dstPreviewPath)
+	assert.NoError(t, err)
+
+	foundBook, err := s.Books().GetByID(book.ID)
+	assert.NoError(t, err)
+
+	assert.Equal(t, book.PreviewPath, foundBook.PreviewPath)
+}
