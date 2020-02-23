@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -24,10 +25,12 @@ const (
 )
 
 type server struct {
-	router    *mux.Router
-	store     store.Store
-	log       *logrus.Logger
-	assetPath string
+	router      *mux.Router
+	store       store.Store
+	log         *logrus.Logger
+	assetPath   string
+	previewPath string
+	filesPath   string
 }
 
 func newServer(store store.Store, log *logrus.Logger) *server {
@@ -52,12 +55,16 @@ func (s *server) configureRouter() {
 	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
 
 	s.router.HandleFunc("/v1.0/types/", s.handleTypesGet()).Methods("GET")
-	s.router.HandleFunc("/v1.0/types/create/", s.handleTypesGet()).Methods("POST")
-	s.router.HandleFunc("/v1.0/types/{id}/books/", s.handleTypesGet()).Methods("GET")
+	s.router.HandleFunc("/v1.0/types/create/", s.handleCreateType()).Methods("POST")
+	s.router.HandleFunc("/v1.0/types/{id}/books/", s.handleGetBooksIDs()).Methods("GET")
 
 	s.router.HandleFunc("/v1.0/books/create/", s.handleCreateBook()).Methods("POST")
 	s.router.HandleFunc("/v1.0/books/{id}/", s.handleGetBookByID()).Methods("GET")
+
+	s.router.HandleFunc("/v1.0/books/{id}/preview/", s.handleBookFile()).Methods("POST")
 	s.router.HandleFunc("/v1.0/books/{id}/preview/", s.handleBookPreview()).Methods("GET")
+
+	s.router.HandleFunc("/v1.0/books/{id}/file/", s.handleBookFile()).Methods("POST")
 	s.router.HandleFunc("/v1.0/books/{id}/file/", s.handleBookFile()).Methods("GET")
 
 	s.log.Info("Endpoints:")
@@ -161,6 +168,47 @@ func (s *server) handleGetBookByID() http.HandlerFunc {
 	}
 }
 
+func (s *server) handleBookPreviewUpload() http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		uuid := r.Header.Get("X-Token-UUID")
+
+		_type, err := s.store.TokensPreview().GetByUID(uuid)
+
+		if _type == nil {
+			s.error(w, r, http.StatusBadRequest, nil)
+			return
+		}
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		r.ParseMultipartForm(10 << 20)
+		file, handler, err := r.FormFile("previsew")
+
+		defer file.Close()
+
+		fileBytes, err := ioutil.ReadAll(file)
+		fileName := handler.Filename
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		savePath := s.assetPath + string(os.PathSeparator) + s.previewPath + string(os.PathSeparator) + fileName
+		err = ioutil.WriteFile(savePath, fileBytes, 0644)
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+	}
+}
+
 func (s *server) handleBookPreview() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -238,7 +286,7 @@ func (s *server) handleCreateType() http.HandlerFunc {
 			s.error(w, r, http.StatusInternalServerError, err)
 		}
 
-		s.respond(w, r, http.StatusOK, nil)
+		s.respond(w, r, http.StatusOK, _type)
 	}
 }
 
