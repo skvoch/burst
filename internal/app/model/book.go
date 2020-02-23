@@ -8,8 +8,8 @@ type Book struct {
 	Review      string `json:"review"`
 	Rating      int    `json:"rating"`
 	Type        int    `json:"type"`
-	FilePath    string `json:"file_path"`
-	PreviewPath string `json:"preview_path"`
+	FilePath    string `json:"file_path,omitempty"`
+	PreviewPath string `json:"preview_path,omitempty"`
 }
 
 func (b *Book) Sanitaize() {

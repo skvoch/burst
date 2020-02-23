@@ -3,6 +3,7 @@ package apiserver
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -88,4 +89,60 @@ func TestServerHandleGetBooksIDs(t *testing.T) {
 
 	check(t, 0, 5)
 	check(t, 1, 5)
+}
+
+func TestServerHandleCreateBook(t *testing.T) {
+
+	log := logrus.New()
+	s := newServer(teststore.New(), log)
+
+	_type := model.NewTestType()
+
+	if err := s.store.Types().Create(_type); err != nil {
+		assert.NoError(t, err)
+	}
+	book := model.NewTestBookWithType(_type.ID)
+
+	requestBody, err := json.Marshal(book)
+
+	if err != nil {
+		assert.NoError(t, err)
+	}
+
+	reader := bytes.NewReader(requestBody)
+
+	{
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodPost, "/v1.0/books/create/", reader)
+		s.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusCreated, rec.Code)
+		if err := json.Unmarshal(rec.Body.Bytes(), book); err != nil {
+			assert.NoError(t, err)
+		}
+	}
+
+	{
+		rec := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, "/v1.0/books/"+strconv.Itoa(book.ID)+"/", reader)
+		s.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		foundBook := &model.Book{}
+		body := rec.Body.Bytes()
+		bodyString := string(body)
+		fmt.Println(bodyString)
+		if err := json.Unmarshal(rec.Body.Bytes(), foundBook); err != nil {
+			assert.NoError(t, err)
+		}
+
+		assert.Equal(t, book.Description, foundBook.Description)
+		assert.Equal(t, book.FilePath, foundBook.FilePath)
+		assert.Equal(t, book.ID, foundBook.ID)
+		assert.Equal(t, book.Name, foundBook.Name)
+		assert.Equal(t, book.PreviewPath, foundBook.PreviewPath)
+		assert.Equal(t, book.Rating, foundBook.Rating)
+		assert.Equal(t, book.Review, foundBook.Review)
+		assert.Equal(t, book.Type, foundBook.Type)
+
+	}
 }

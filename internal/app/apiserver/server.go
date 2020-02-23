@@ -147,7 +147,7 @@ func (s *server) handleGetBookByID() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		ID, err := strconv.Atoi(vars["ID"])
+		ID, err := strconv.Atoi(vars["id"])
 
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
@@ -164,6 +164,7 @@ func (s *server) handleGetBookByID() http.HandlerFunc {
 			s.error(w, r, http.StatusNotFound, err)
 		}
 
+		book.Sanitaize()
 		s.respond(w, r, http.StatusOK, book)
 	}
 }
