@@ -45,10 +45,6 @@ func (b *BurstClient) ping() error {
 
 func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 
-	type Response struct {
-		BooksIDs []int `json:"books_ids"`
-	}
-
 	id := strconv.Itoa(typeID)
 
 	url := b.serverAddr + "/v1.0/types/" + id + "/books/"
@@ -57,7 +53,7 @@ func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	respData := &Response{}
+	respData := &GetBooksIDsResponse{}
 	json.NewDecoder(r.Body).Decode(respData)
 
 	return respData.BooksIDs, nil
@@ -100,4 +96,31 @@ func (b *BurstClient) CreateType(_type *model.Type) error {
 	}
 
 	return nil
+}
+
+func (b *BurstClient) CreateBook(book *model.Book) (*BookUploadTokens, error) {
+	url := b.serverAddr + "/v1.0/books/create/"
+
+	data := make([]byte, 0)
+	if err := json.Unmarshal(data, book); err != nil {
+		return nil, err
+	}
+	reader := bytes.NewReader(data)
+
+	res, err := b.client.Post(url, "application/json", reader)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if res.StatusCode != http.StatusCreated {
+		return nil, &WrongResponseStatus{}
+	}
+
+	tokens := &BookUploadTokens{}
+	if err := json.NewDecoder(res.Body).Decode(tokens); err != nil {
+		return nil, err
+	}
+
+	return tokens, nil
 }
