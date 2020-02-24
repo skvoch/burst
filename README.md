@@ -3,7 +3,7 @@
 </p>
 
 # Burst
-An application to provide access to your book collection
+Application to provide access to your book collection
 
 # Features
 - coming soon
