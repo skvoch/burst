@@ -28,6 +28,10 @@ func New(config *Config) (*BurstClient, error) {
 	return client, nil
 }
 
+func (b *BurstClient) makeURL(endpoint string) string {
+	return b.serverAddr + endpoint
+}
+
 func (b *BurstClient) ping() error {
 	url := b.serverAddr + "/v1.0/ping/"
 	r, err := b.client.Get(url)
@@ -47,7 +51,7 @@ func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 
 	id := strconv.Itoa(typeID)
 
-	url := b.serverAddr + "/v1.0/types/" + id + "/books/"
+	url := b.makeURL("/v1.0/types/" + id + "/books/")
 	r, err := b.client.Get(url)
 
 	if err != nil {
@@ -61,7 +65,7 @@ func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 
 func (b *BurstClient) GetAllTypes() ([]*model.Type, error) {
 
-	url := b.serverAddr + "/v1.0/types/"
+	url := b.makeURL("/v1.0/types/")
 	r, err := b.client.Get(url)
 
 	if err != nil {
@@ -77,7 +81,7 @@ func (b *BurstClient) GetAllTypes() ([]*model.Type, error) {
 }
 
 func (b *BurstClient) CreateType(_type *model.Type) error {
-	url := b.serverAddr + "/v1.0/types/create/"
+	url := b.makeURL("/v1.0/types/create/")
 
 	data := make([]byte, 0)
 	if err := json.Unmarshal(data, _type); err != nil {
@@ -99,7 +103,7 @@ func (b *BurstClient) CreateType(_type *model.Type) error {
 }
 
 func (b *BurstClient) CreateBook(book *model.Book) (*BookUploadTokens, error) {
-	url := b.serverAddr + "/v1.0/books/create/"
+	url := b.makeURL("/v1.0/books/create/")
 
 	data := make([]byte, 0)
 	if err := json.Unmarshal(data, book); err != nil {
@@ -123,4 +127,21 @@ func (b *BurstClient) CreateBook(book *model.Book) (*BookUploadTokens, error) {
 	}
 
 	return tokens, nil
+}
+
+func (b *BurstClient) GetBookByID(ID int) (*model.Book, error) {
+	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/")
+
+	book := &model.Book{}
+	res, err := b.client.Get(url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.NewDecoder(res.Body).Decode(book); err != nil {
+		return nil, err
+	}
+
+	return book, nil
 }
