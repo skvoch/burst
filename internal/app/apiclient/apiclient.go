@@ -1,9 +1,12 @@
 package apiclient
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"strconv"
+
+	"github.com/skvoch/burst/internal/app/model"
 )
 
 type BurstClient struct {
@@ -26,7 +29,7 @@ func New(config *Config) (*BurstClient, error) {
 }
 
 func (b *BurstClient) ping() error {
-	url := b.serverAddr + "/ping/"
+	url := b.serverAddr + "/v1.0/ping/"
 	r, err := b.client.Get(url)
 
 	if r.StatusCode != http.StatusOK {
@@ -40,7 +43,7 @@ func (b *BurstClient) ping() error {
 	return nil
 }
 
-func (b *BurstClient) getBookIDs(typeID int) ([]int, error) {
+func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 
 	type Response struct {
 		BooksIDs []int `json:"books_ids"`
@@ -58,4 +61,43 @@ func (b *BurstClient) getBookIDs(typeID int) ([]int, error) {
 	json.NewDecoder(r.Body).Decode(respData)
 
 	return respData.BooksIDs, nil
+}
+
+func (b *BurstClient) GetAllTypes() ([]*model.Type, error) {
+
+	url := b.serverAddr + "/v1.0/types/"
+	r, err := b.client.Get(url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	types := make([]*model.Type, 0)
+	if err := json.NewDecoder(r.Body).Decode(&types); err != nil {
+		return nil, err
+	}
+
+	return types, nil
+}
+
+func (b *BurstClient) CreateType(_type *model.Type) error {
+	url := b.serverAddr + "/v1.0/types/create/"
+
+	data := make([]byte, 0)
+	if err := json.Unmarshal(data, _type); err != nil {
+		return err
+	}
+	reader := bytes.NewReader(data)
+
+	res, err := b.client.Post(url, "application/json", reader)
+
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusCreated {
+		return &WrongResponseStatus{}
+	}
+
+	return nil
 }
