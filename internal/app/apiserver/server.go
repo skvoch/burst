@@ -255,7 +255,7 @@ func (s *server) handleBookPreview() http.HandlerFunc {
 			s.error(w, r, http.StatusNotFound, err)
 		}
 
-		s.respondFile(w, r, previewPath, file)
+		s.respondFile(w, r, "preview", file)
 	}
 }
 func (s *server) handleBookFile() http.HandlerFunc {
@@ -272,7 +272,6 @@ func (s *server) handleBookFile() http.HandlerFunc {
 
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
-
 		}
 
 		if book == nil {
