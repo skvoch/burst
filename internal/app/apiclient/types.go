@@ -11,3 +11,7 @@ type BookUploadTokens struct {
 type GetBooksIDsResponse struct {
 	BooksIDs []int `json:"books_ids"`
 }
+
+type CreateTypeResponse struct {
+	ID int `json:"ID"`
+}

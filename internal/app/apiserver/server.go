@@ -58,9 +58,11 @@ func (s *server) configureRouter() {
 
 	s.router.HandleFunc("/v1.0/ping/", s.handlePing()).Methods("GET")
 	s.router.HandleFunc("/v1.0/types/", s.handleTypesGet()).Methods("GET")
-	s.router.HandleFunc("/v1.0/types/", s.handleRemoveAllTypes()).Methods("POST")
+	s.router.HandleFunc("/v1.0/types/", s.handleRemoveAllTypes()).Methods("DELETE")
 	s.router.HandleFunc("/v1.0/types/create/", s.handleCreateType()).Methods("POST")
 	s.router.HandleFunc("/v1.0/types/{id}/books/", s.handleGetBooksIDs()).Methods("GET")
+
+	s.router.HandleFunc("/v1.0/books/remove/", s.handleRemoveAllBooks()).Methods("DELETE")
 
 	s.router.HandleFunc("/v1.0/books/create/", s.handleCreateBook()).Methods("POST")
 	s.router.HandleFunc("/v1.0/books/{id}/", s.handleGetBookByID()).Methods("GET")
@@ -109,6 +111,17 @@ func (s *server) logRequest(next http.Handler) http.Handler {
 
 func (s *server) handlePing() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		s.respond(w, r, http.StatusOK, nil)
+	}
+}
+
+func (s *server) handleRemoveAllBooks() http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := s.store.Books().RemoveAll(); err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
 		s.respond(w, r, http.StatusOK, nil)
 	}
 }
@@ -341,6 +354,10 @@ func (s *server) handleBookFileUpload() http.HandlerFunc {
 
 func (s *server) handleCreateType() http.HandlerFunc {
 
+	type Response struct {
+		ID int `json:"ID"`
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		_type := &model.Type{}
@@ -352,8 +369,8 @@ func (s *server) handleCreateType() http.HandlerFunc {
 		if err := s.store.Types().Create(_type); err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
 		}
-
-		s.respond(w, r, http.StatusCreated, _type)
+		res := &Response{ID: _type.ID}
+		s.respond(w, r, http.StatusCreated, res)
 	}
 }
 

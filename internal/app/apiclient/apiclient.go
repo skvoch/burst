@@ -57,6 +57,7 @@ func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	respData := &GetBooksIDsResponse{}
 	json.NewDecoder(r.Body).Decode(respData)
 
@@ -66,7 +67,35 @@ func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 func (b *BurstClient) RemoveAllTypes() error {
 	url := b.makeURL("/v1.0/types/")
 
-	r, err := b.client.Post(url, "", nil)
+	rec, err := http.NewRequest("DELETE", url, nil)
+
+	if err != nil {
+		return err
+	}
+
+	r, err := b.client.Do(rec)
+
+	if err != nil {
+		return err
+	}
+
+	if r.StatusCode != http.StatusOK {
+		return &WrongResponseStatus{}
+	}
+
+	return nil
+}
+
+func (b *BurstClient) RemoveAllBooks() error {
+	url := b.makeURL("/v1.0/books/remove/")
+
+	rec, err := http.NewRequest("DELETE", url, nil)
+
+	if err != nil {
+		return err
+	}
+
+	r, err := b.client.Do(rec)
 
 	if err != nil {
 		return err
@@ -96,14 +125,14 @@ func (b *BurstClient) GetAllTypes() ([]*model.Type, error) {
 	return types, nil
 }
 
-func (b *BurstClient) CreateType(_type *model.Type) error {
+func (b *BurstClient) CreateType(_type *model.Type) (int, error) {
 	url := b.makeURL("/v1.0/types/create/")
 
 	data := make([]byte, 0)
 	data, err := json.Marshal(_type)
 
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	reader := bytes.NewReader(data)
@@ -111,14 +140,19 @@ func (b *BurstClient) CreateType(_type *model.Type) error {
 	res, err := b.client.Post(url, "application/json", reader)
 
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	if res.StatusCode != http.StatusCreated {
-		return &WrongResponseStatus{}
+		return -1, &WrongResponseStatus{}
 	}
 
-	return nil
+	response := &CreateTypeResponse{}
+	if err := json.NewDecoder(res.Body).Decode(response); err != nil {
+		return -1, err
+	}
+
+	return response.ID, nil
 }
 
 func (b *BurstClient) CreateBook(book *model.Book) (*BookUploadTokens, error) {

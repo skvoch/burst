@@ -3,4 +3,4 @@ log_level = "debug"
 files_directory = "/"
 previews_directory = "/"
 
-database_url = "host=localhost dbname=burst_dev sslmode=disable user=postgres password=docker"
+database_url = "host=localhost dbname=burst_test sslmode=disable user=postgres password=docker"

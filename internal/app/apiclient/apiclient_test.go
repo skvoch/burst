@@ -35,7 +35,8 @@ func TestTypes(t *testing.T) {
 	types = append(types, &model.Type{Name: "Go Books"})
 
 	for _, _type := range types {
-		err := client.CreateType(_type)
+		id, err := client.CreateType(_type)
+		_type.ID = id
 		assert.NoError(t, err)
 	}
 
@@ -46,4 +47,43 @@ func TestTypes(t *testing.T) {
 	for i := 0; i < len(types); i++ {
 		assert.Equal(t, types[i].Name, foundTypes[i].Name)
 	}
+}
+
+func TestGetBooksIDsByType(t *testing.T) {
+	client, err := apiclient.NewTestClient(URL)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, client)
+
+	_type := &model.Type{Name: "Go books"}
+
+	if err := client.RemoveAllBooks(); err != nil {
+		assert.NoError(t, err)
+	}
+
+	id, err := client.CreateType(_type)
+	if err != nil {
+		assert.NoError(t, err)
+	}
+	_type.ID = id
+
+	books := make([]*model.Book, 5)
+
+	books = append(books, model.NewTestBookWithType(_type.ID))
+	books = append(books, model.NewTestBookWithType(_type.ID))
+	books = append(books, model.NewTestBookWithType(_type.ID))
+	books = append(books, model.NewTestBookWithType(_type.ID))
+	books = append(books, model.NewTestBookWithType(_type.ID))
+
+	for _, book := range books {
+		if _, err := client.CreateBook(book); err != nil {
+			assert.NoError(t, err)
+		}
+	}
+
+	ids, err := client.GetBookIDs(_type.ID)
+
+	assert.NotNil(t, ids)
+	assert.NoError(t, err)
+	assert.True(t, len(ids) == 5)
 }
