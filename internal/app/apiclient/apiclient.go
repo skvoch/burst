@@ -145,3 +145,69 @@ func (b *BurstClient) GetBookByID(ID int) (*model.Book, error) {
 
 	return book, nil
 }
+
+func (b *BurstClient) GetBookPreview(ID int) ([]byte, error) {
+	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/preview/")
+
+	res, err := b.client.Get(url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	file, _, err := res.Request.FormFile("preview")
+
+	result := make([]byte, 0)
+	_, err = file.Read(result)
+
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (b *BurstClient) SendPreviewPreview(data []byte, bookID int, UUID string) error {
+	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/preview/")
+
+	reader := bytes.NewReader(data)
+	_, err := http.Post(url, "binary/octet-stream", reader)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (b *BurstClient) GetBookFile(ID int) ([]byte, error) {
+	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/file/")
+
+	res, err := b.client.Get(url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	file, _, err := res.Request.FormFile("file")
+
+	result := make([]byte, 0)
+	_, err = file.Read(result)
+
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (b *BurstClient) SendPreviewFile(data []byte, bookID int, UUID string) error {
+	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/file/")
+
+	reader := bytes.NewReader(data)
+	_, err := http.Post(url, "binary/octet-stream", reader)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
