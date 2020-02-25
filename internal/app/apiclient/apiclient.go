@@ -36,12 +36,12 @@ func (b *BurstClient) ping() error {
 	url := b.serverAddr + "/v1.0/ping/"
 	r, err := b.client.Get(url)
 
-	if r.StatusCode != http.StatusOK {
-		return &UnableConnectToServer{}
-	}
-
 	if err != nil {
 		return err
+	}
+
+	if r.StatusCode != http.StatusOK {
+		return &UnableConnectToServer{}
 	}
 
 	return nil
@@ -61,6 +61,22 @@ func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 	json.NewDecoder(r.Body).Decode(respData)
 
 	return respData.BooksIDs, nil
+}
+
+func (b *BurstClient) RemoveAllTypes() error {
+	url := b.makeURL("/v1.0/types/")
+
+	r, err := b.client.Post(url, "", nil)
+
+	if err != nil {
+		return err
+	}
+
+	if r.StatusCode != http.StatusOK {
+		return &WrongResponseStatus{}
+	}
+
+	return nil
 }
 
 func (b *BurstClient) GetAllTypes() ([]*model.Type, error) {
@@ -84,9 +100,12 @@ func (b *BurstClient) CreateType(_type *model.Type) error {
 	url := b.makeURL("/v1.0/types/create/")
 
 	data := make([]byte, 0)
-	if err := json.Unmarshal(data, _type); err != nil {
+	data, err := json.Marshal(_type)
+
+	if err != nil {
 		return err
 	}
+
 	reader := bytes.NewReader(data)
 
 	res, err := b.client.Post(url, "application/json", reader)

@@ -58,6 +58,7 @@ func (s *server) configureRouter() {
 
 	s.router.HandleFunc("/v1.0/ping/", s.handlePing()).Methods("GET")
 	s.router.HandleFunc("/v1.0/types/", s.handleTypesGet()).Methods("GET")
+	s.router.HandleFunc("/v1.0/types/", s.handleRemoveAllTypes()).Methods("POST")
 	s.router.HandleFunc("/v1.0/types/create/", s.handleCreateType()).Methods("POST")
 	s.router.HandleFunc("/v1.0/types/{id}/books/", s.handleGetBooksIDs()).Methods("GET")
 
@@ -353,6 +354,19 @@ func (s *server) handleCreateType() http.HandlerFunc {
 		}
 
 		s.respond(w, r, http.StatusCreated, _type)
+	}
+}
+
+func (s *server) handleRemoveAllTypes() http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := s.store.Types().RemoveAll()
+
+		if err != nil {
+			s.error(w, r, http.StatusInternalServerError, err)
+		}
+
+		s.respond(w, r, http.StatusOK, nil)
 	}
 }
 
