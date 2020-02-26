@@ -1,6 +1,7 @@
 package apiclient_test
 
 import (
+	"crypto/rand"
 	"testing"
 
 	"github.com/skvoch/burst/internal/app/apiclient"
@@ -86,4 +87,31 @@ func TestGetBooksIDsByType(t *testing.T) {
 	assert.NotNil(t, ids)
 	assert.NoError(t, err)
 	assert.True(t, len(ids) == 5)
+}
+
+func TestGetBookPreview(t *testing.T) {
+	client, err := apiclient.NewTestClient(URL)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, client)
+
+	_type := model.NewTestType()
+
+	id, err := client.CreateType(_type)
+	assert.NoError(t, err)
+	_type.ID = id
+
+	book := model.NewTestBookWithType(_type.ID)
+	tokens, err := client.CreateBook(book)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, tokens)
+	book.ID = tokens.BookID
+
+	previewData := make([]byte, 256)
+	previewName := "image.jpg"
+
+	rand.Read(previewData)
+
+	client.SendPreviewFile(previewData, previewName, book.ID, tokens.PreviewUUID)
 }

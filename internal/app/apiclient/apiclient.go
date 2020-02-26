@@ -252,14 +252,26 @@ func (b *BurstClient) GetBookFile(ID int) ([]byte, error) {
 	return result, nil
 }
 
-func (b *BurstClient) SendPreviewFile(data []byte, bookID int, UUID string) error {
+func (b *BurstClient) SendPreviewFile(data []byte, name string, bookID int, UUID string) error {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/file/")
 
 	reader := bytes.NewReader(data)
-	_, err := http.Post(url, "binary/octet-stream", reader)
+	req, err := http.NewRequest("POST", url, reader)
+	req.Header.Set("Content-Type", "binary/octet-stream")
+	req.Header.Set("X-Token-UUID", UUID)
 
 	if err != nil {
 		return err
+	}
+
+	res, err := b.client.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusCreated {
+		return &WrongResponseStatus{}
 	}
 
 	return nil

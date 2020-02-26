@@ -129,6 +129,7 @@ func (s *server) handleRemoveAllBooks() http.HandlerFunc {
 func (s *server) handleCreateBook() http.HandlerFunc {
 
 	type Response struct {
+		BookID      int    `json:"book_id"`
 		FileUUID    string `json:"file_uuid"`
 		PreviewUUID string `json:"preview_uuid"`
 	}
@@ -239,6 +240,8 @@ func (s *server) handleBookPreviewUpload() http.HandlerFunc {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
+
+		s.respond(w, r, http.StatusCreated, nil)
 	}
 }
 
