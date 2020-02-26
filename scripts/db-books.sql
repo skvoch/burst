@@ -4,7 +4,7 @@ name text,
 description text,
 review text,
 rating integer,
-file_path text unique,
-preview_path text unique,
+file_path text,
+preview_path text,
 type integer REFERENCES types(id)
 );

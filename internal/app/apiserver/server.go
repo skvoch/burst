@@ -138,6 +138,7 @@ func (s *server) handleCreateBook() http.HandlerFunc {
 
 		if err := json.NewDecoder(r.Body).Decode(book); err != nil {
 			s.error(w, r, http.StatusBadRequest, err)
+			return
 		}
 
 		book.Sanitaize()
@@ -426,6 +427,7 @@ func (s *server) handleGetBooksIDs() http.HandlerFunc {
 		}
 
 		books, err := s.store.Books().GetByType(_type)
+		s.log.Println(books)
 
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)

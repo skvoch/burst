@@ -158,8 +158,8 @@ func (b *BurstClient) CreateType(_type *model.Type) (int, error) {
 func (b *BurstClient) CreateBook(book *model.Book) (*BookUploadTokens, error) {
 	url := b.makeURL("/v1.0/books/create/")
 
-	data := make([]byte, 0)
-	if err := json.Unmarshal(data, book); err != nil {
+	data, err := json.Marshal(book)
+	if err != nil {
 		return nil, err
 	}
 	reader := bytes.NewReader(data)

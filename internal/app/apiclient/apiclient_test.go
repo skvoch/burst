@@ -67,7 +67,7 @@ func TestGetBooksIDsByType(t *testing.T) {
 	}
 	_type.ID = id
 
-	books := make([]*model.Book, 5)
+	books := make([]*model.Book, 0)
 
 	books = append(books, model.NewTestBookWithType(_type.ID))
 	books = append(books, model.NewTestBookWithType(_type.ID))
