@@ -2,6 +2,9 @@ package apiclient_test
 
 import (
 	"crypto/rand"
+	"io/ioutil"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/skvoch/burst/internal/app/apiclient"
@@ -113,5 +116,12 @@ func TestGetBookPreview(t *testing.T) {
 
 	rand.Read(previewData)
 
-	client.SendPreviewFile(previewData, previewName, book.ID, tokens.PreviewUUID)
+	file, err := ioutil.TempFile("/tmp/", "preview")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+	file.Write(previewData)
+
+	client.SendPreviewFile(file.Name(), previewName, book.ID, tokens.PreviewUUID)
 }

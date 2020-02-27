@@ -1,6 +1,6 @@
 bind_addr = "localhost:8080"
 log_level = "debug"
-files_directory = "/"
-previews_directory = "/"
+files_directory = "/tmp/"
+previews_directory = "/tmp/"
 
 database_url = "host=localhost dbname=burst_test sslmode=disable user=postgres password=docker"

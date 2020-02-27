@@ -9,10 +9,12 @@ type BookUploadTokens struct {
 	PreviewUUID string `json:"preview_uuid"`
 }
 
+// GetBooksIDsResponse ...
 type GetBooksIDsResponse struct {
 	BooksIDs []int `json:"books_ids"`
 }
 
+// CreateTypeResponse ...
 type CreateTypeResponse struct {
 	ID int `json:"ID"`
 }

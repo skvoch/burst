@@ -3,12 +3,17 @@ package apiclient
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/skvoch/burst/internal/app/model"
 )
 
+// BurstClient ...
 type BurstClient struct {
 	serverAddr string
 	client     *http.Client
@@ -47,6 +52,7 @@ func (b *BurstClient) ping() error {
 	return nil
 }
 
+// GetBookIDs ...
 func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 
 	id := strconv.Itoa(typeID)
@@ -64,6 +70,7 @@ func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 	return respData.BooksIDs, nil
 }
 
+// RemoveAllTypes ...
 func (b *BurstClient) RemoveAllTypes() error {
 	url := b.makeURL("/v1.0/types/")
 
@@ -86,6 +93,7 @@ func (b *BurstClient) RemoveAllTypes() error {
 	return nil
 }
 
+// RemoveAllBooks ...
 func (b *BurstClient) RemoveAllBooks() error {
 	url := b.makeURL("/v1.0/books/remove/")
 
@@ -108,6 +116,7 @@ func (b *BurstClient) RemoveAllBooks() error {
 	return nil
 }
 
+// GetAllTypes ...
 func (b *BurstClient) GetAllTypes() ([]*model.Type, error) {
 
 	url := b.makeURL("/v1.0/types/")
@@ -125,6 +134,7 @@ func (b *BurstClient) GetAllTypes() ([]*model.Type, error) {
 	return types, nil
 }
 
+// CreateType ...
 func (b *BurstClient) CreateType(_type *model.Type) (int, error) {
 	url := b.makeURL("/v1.0/types/create/")
 
@@ -155,6 +165,7 @@ func (b *BurstClient) CreateType(_type *model.Type) (int, error) {
 	return response.ID, nil
 }
 
+// CreateBook ...
 func (b *BurstClient) CreateBook(book *model.Book) (*BookUploadTokens, error) {
 	url := b.makeURL("/v1.0/books/create/")
 
@@ -182,6 +193,7 @@ func (b *BurstClient) CreateBook(book *model.Book) (*BookUploadTokens, error) {
 	return tokens, nil
 }
 
+// GetBookByID ...
 func (b *BurstClient) GetBookByID(ID int) (*model.Book, error) {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/")
 
@@ -199,6 +211,7 @@ func (b *BurstClient) GetBookByID(ID int) (*model.Book, error) {
 	return book, nil
 }
 
+// GetBookPreview ...
 func (b *BurstClient) GetBookPreview(ID int) ([]byte, error) {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/preview/")
 
@@ -219,7 +232,8 @@ func (b *BurstClient) GetBookPreview(ID int) ([]byte, error) {
 	return result, nil
 }
 
-func (b *BurstClient) SendPreviewPreview(data []byte, bookID int, UUID string) error {
+// SendBookFile ...
+func (b *BurstClient) SendBookFile(data []byte, bookID int, UUID string) error {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/preview/")
 
 	reader := bytes.NewReader(data)
@@ -232,6 +246,7 @@ func (b *BurstClient) SendPreviewPreview(data []byte, bookID int, UUID string) e
 	return nil
 }
 
+// GetBookFile ...
 func (b *BurstClient) GetBookFile(ID int) ([]byte, error) {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/file/")
 
@@ -252,27 +267,29 @@ func (b *BurstClient) GetBookFile(ID int) ([]byte, error) {
 	return result, nil
 }
 
-func (b *BurstClient) SendPreviewFile(data []byte, name string, bookID int, UUID string) error {
-	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/file/")
+// SendPreviewFile ...
+func (b *BurstClient) SendPreviewFile(filePath string, name string, bookID int, UUID string) error {
+	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/preview/")
 
-	reader := bytes.NewReader(data)
-	req, err := http.NewRequest("POST", url, reader)
-	req.Header.Set("Content-Type", "binary/octet-stream")
+	file, err := os.Open(filePath)
+	defer file.Close()
+
+	if err != nil {
+		return err
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("preview", filepath.Base(file.Name()))
+	io.Copy(part, file)
+	writer.Close()
+
+	req, _ := http.NewRequest("POST", url, body)
+	req.Header.Add("Content-Type", writer.FormDataContentType())
 	req.Header.Set("X-Token-UUID", UUID)
 
-	if err != nil {
-		return err
-	}
-
-	res, err := b.client.Do(req)
-
-	if err != nil {
-		return err
-	}
-
-	if res.StatusCode != http.StatusCreated {
-		return &WrongResponseStatus{}
-	}
+	client := &http.Client{}
+	client.Do(req)
 
 	return nil
 }
