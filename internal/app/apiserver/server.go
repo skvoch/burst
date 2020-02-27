@@ -92,6 +92,10 @@ func (s *server) setRequestID(next http.Handler) http.Handler {
 	})
 }
 
+func (s *server) getFilePath(fileName string) string {
+	return s.previewsDirectory + fileName
+}
+
 func (s *server) logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger := s.log.WithFields(logrus.Fields{
@@ -162,6 +166,7 @@ func (s *server) handleCreateBook() http.HandlerFunc {
 		response := &Response{
 			FileUUID:    fileToken.UID,
 			PreviewUUID: previewToken.UID,
+			BookID:      book.ID,
 		}
 
 		s.respond(w, r, http.StatusCreated, response)
@@ -249,31 +254,34 @@ func (s *server) handleBookPreview() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		ID, err := strconv.Atoi(vars["ID"])
+		ID, err := strconv.Atoi(vars["id"])
 
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
+			return
 		}
 
 		book, err := s.store.Books().GetByID(ID)
 
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
-
+			return
 		}
 
 		if book == nil {
 			s.error(w, r, http.StatusNotFound, err)
+			return
 		}
 
-		previewPath := book.PreviewPath
+		previewPath := s.getFilePath(book.PreviewPath)
 		file, err := os.Open(previewPath)
 
 		if err != nil {
 			s.error(w, r, http.StatusNotFound, err)
+			return
 		}
 
-		s.respondFile(w, r, "preview", file)
+		s.respondFile(w, r, book.PreviewPath, file)
 	}
 }
 func (s *server) handleBookFile() http.HandlerFunc {
@@ -337,7 +345,7 @@ func (s *server) handleBookFileUpload() http.HandlerFunc {
 			return
 		}
 
-		savePath := s.assetPath + string(os.PathSeparator) + s.filesDirecotry + string(os.PathSeparator) + fileName
+		savePath := s.getFilePath(fileName)
 		err = ioutil.WriteFile(savePath, fileBytes, 0644)
 
 		if err != nil {
@@ -448,7 +456,7 @@ func (s *server) handleGetBooksIDs() http.HandlerFunc {
 func (s *server) respondFile(w http.ResponseWriter, r *http.Request, name string, data io.ReadSeeker) {
 
 	modtime := time.Now()
-	w.Header().Add("Content-Disposition", "Attachment")
+	w.Header().Add("Content-Disposition", "Attachment; filename="+name)
 
 	http.ServeContent(w, r, name, modtime, data)
 }

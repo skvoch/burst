@@ -3,6 +3,7 @@ package apiclient
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -220,16 +221,9 @@ func (b *BurstClient) GetBookPreview(ID int) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(res.Body)
 
-	file, _, err := res.Request.FormFile("preview")
-
-	result := make([]byte, 0)
-	_, err = file.Read(result)
-
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	return nil, nil
 }
 
 // SendBookFile ...
