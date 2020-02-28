@@ -3,8 +3,9 @@ package apiclient
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
+	"io/ioutil"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -213,56 +214,76 @@ func (b *BurstClient) GetBookByID(ID int) (*model.Book, error) {
 }
 
 // GetBookPreview ...
-func (b *BurstClient) GetBookPreview(ID int) ([]byte, error) {
+func (b *BurstClient) GetBookPreview(ID int) *FileResponse {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/preview/")
 
 	res, err := b.client.Get(url)
 
 	if err != nil {
-		return nil, err
+		return &FileResponse{Err: err}
 	}
-	fmt.Println(res.Body)
 
-	return nil, nil
+	if res.StatusCode == http.StatusInternalServerError {
+		return &FileResponse{Err: err}
+	}
+
+	_, params, err := mime.ParseMediaType(res.Header.Get("Content-Disposition"))
+	fileName := params["filename"]
+	bodyBytes, err := ioutil.ReadAll(res.Body)
+
+	return &FileResponse{FileName: fileName, Data: bodyBytes, Err: nil}
 }
 
 // SendBookFile ...
-func (b *BurstClient) SendBookFile(data []byte, bookID int, UUID string) error {
-	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/preview/")
+func (b *BurstClient) SendBookFile(filePath string, bookID int, UUID string) error {
+	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/file/")
 
-	reader := bytes.NewReader(data)
-	_, err := http.Post(url, "binary/octet-stream", reader)
+	file, err := os.Open(filePath)
+	defer file.Close()
 
 	if err != nil {
 		return err
 	}
 
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	io.Copy(part, file)
+	writer.Close()
+
+	req, _ := http.NewRequest("POST", url, body)
+	req.Header.Add("Content-Type", writer.FormDataContentType())
+	req.Header.Set("X-Token-UUID", UUID)
+
+	client := &http.Client{}
+	client.Do(req)
+
 	return nil
 }
 
 // GetBookFile ...
-func (b *BurstClient) GetBookFile(ID int) ([]byte, error) {
+func (b *BurstClient) GetBookFile(ID int) *FileResponse {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/file/")
 
 	res, err := b.client.Get(url)
 
 	if err != nil {
-		return nil, err
+		return &FileResponse{Err: err}
 	}
 
-	file, _, err := res.Request.FormFile("file")
-
-	result := make([]byte, 0)
-	_, err = file.Read(result)
-
-	if err != nil {
-		return nil, err
+	if res.StatusCode == http.StatusInternalServerError {
+		return &FileResponse{Err: err}
 	}
-	return result, nil
+
+	_, params, err := mime.ParseMediaType(res.Header.Get("Content-Disposition"))
+	fileName := params["filename"]
+	bodyBytes, err := ioutil.ReadAll(res.Body)
+
+	return &FileResponse{FileName: fileName, Data: bodyBytes, Err: nil}
 }
 
 // SendPreviewFile ...
-func (b *BurstClient) SendPreviewFile(filePath string, name string, bookID int, UUID string) error {
+func (b *BurstClient) SendPreviewFile(filePath string, bookID int, UUID string) error {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/preview/")
 
 	file, err := os.Open(filePath)

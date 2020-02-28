@@ -18,3 +18,10 @@ type GetBooksIDsResponse struct {
 type CreateTypeResponse struct {
 	ID int `json:"ID"`
 }
+
+// FileResponse ...
+type FileResponse struct {
+	Data     []byte
+	FileName string
+	Err      error
+}

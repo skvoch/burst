@@ -1,6 +1,7 @@
 package apiclient_test
 
 import (
+	"crypto/md5"
 	"crypto/rand"
 	"io/ioutil"
 	"log"
@@ -112,7 +113,6 @@ func TestGetBookPreview(t *testing.T) {
 	book.ID = tokens.BookID
 
 	previewData := make([]byte, 256)
-	previewName := "image.jpg"
 
 	rand.Read(previewData)
 
@@ -123,11 +123,58 @@ func TestGetBookPreview(t *testing.T) {
 	defer os.Remove(file.Name())
 	file.Write(previewData)
 
-	err = client.SendPreviewFile(file.Name(), previewName, book.ID, tokens.PreviewUUID)
+	err = client.SendPreviewFile(file.Name(), book.ID, tokens.PreviewUUID)
 	assert.NoError(t, err)
 
-	pData, err := client.GetBookPreview(tokens.BookID)
+	fileRespond := client.GetBookPreview(tokens.BookID)
 
-	assert.NotNil(t, pData)
+	assert.NotNil(t, fileRespond.Data)
 	assert.NoError(t, err)
+
+	hash := md5.Sum(previewData)
+	foundHash := md5.Sum(fileRespond.Data)
+	assert.Equal(t, hash, foundHash)
+}
+
+func TestGetBookFile(t *testing.T) {
+	client, err := apiclient.NewTestClient(URL)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, client)
+
+	_type := model.NewTestType()
+
+	id, err := client.CreateType(_type)
+	assert.NoError(t, err)
+	_type.ID = id
+
+	book := model.NewTestBookWithType(_type.ID)
+	tokens, err := client.CreateBook(book)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, tokens)
+	book.ID = tokens.BookID
+
+	fileData := make([]byte, 256)
+
+	rand.Read(fileData)
+
+	file, err := ioutil.TempFile("/tmp/", "file")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+	file.Write(fileData)
+
+	err = client.SendBookFile(file.Name(), book.ID, tokens.FileUUID)
+	assert.NoError(t, err)
+
+	fileRespond := client.GetBookFile(tokens.BookID)
+
+	assert.NotNil(t, fileRespond.Data)
+	assert.NoError(t, err)
+
+	hash := md5.Sum(fileData)
+	foundHash := md5.Sum(fileRespond.Data)
+	assert.Equal(t, hash, foundHash)
 }
