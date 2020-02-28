@@ -92,8 +92,12 @@ func (s *server) setRequestID(next http.Handler) http.Handler {
 	})
 }
 
-func (s *server) getFilePath(fileName string) string {
+func (s *server) getPreviewPath(fileName string) string {
 	return s.previewsDirectory + fileName
+}
+
+func (s *server) getFilePath(fileName string) string {
+	return s.filesDirecotry + fileName
 }
 
 func (s *server) logRequest(next http.Handler) http.Handler {
@@ -288,30 +292,34 @@ func (s *server) handleBookFile() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		ID, err := strconv.Atoi(vars["ID"])
+		ID, err := strconv.Atoi(vars["id"])
 
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
+			return
 		}
 
 		book, err := s.store.Books().GetByID(ID)
 
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
+			return
 		}
 
 		if book == nil {
 			s.error(w, r, http.StatusNotFound, err)
+			return
 		}
 
-		filePath := book.FilePath
-		file, err := os.Open(filePath)
+		previewPath := s.getFilePath(book.FilePath)
+		file, err := os.Open(previewPath)
 
 		if err != nil {
 			s.error(w, r, http.StatusNotFound, err)
+			return
 		}
 
-		s.respondFile(w, r, filePath, file)
+		s.respondFile(w, r, book.FilePath, file)
 	}
 }
 
@@ -320,7 +328,7 @@ func (s *server) handleBookFileUpload() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		uuid := r.Header.Get("X-Token-UUID")
 
-		token, err := s.store.TokensPreview().GetByUID(uuid)
+		token, err := s.store.TokensPDF().GetByUID(uuid)
 
 		if token == nil {
 			s.error(w, r, http.StatusBadRequest, nil)
@@ -357,10 +365,12 @@ func (s *server) handleBookFileUpload() http.HandlerFunc {
 			return
 		}
 
-		if err != s.store.TokensPreview().Remove(token) {
+		if err != s.store.TokensPDF().Remove(token) {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
+
+		s.respond(w, r, http.StatusCreated, nil)
 	}
 }
 
