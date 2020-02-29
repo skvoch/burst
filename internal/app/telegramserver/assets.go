@@ -5,25 +5,22 @@ import (
 )
 
 var (
-	typesBtn = tb.InlineButton{
-		Unique: "type_btn",
-		Text:   "📚 Types of books",
+	typesBtn = tb.ReplyButton{
+		Text: "📚 Types of books",
 	}
 
-	aboutBtn = tb.InlineButton{
-		Unique: "about_btn",
-		Text:   "ℹ️ About",
+	aboutBtn = tb.ReplyButton{
+		Text: "ℹ️ About",
 	}
 
-	sourceBtn = tb.InlineButton{
-		Unique: "source_btn",
-		Text:   "💾 Source Code",
+	sourceBtn = tb.ReplyButton{
+		Text: "💾 Source Code",
 	}
 
-	helloMessage = "Hello, this is bot for sharing my collection of books, use this buttons for continue."
+	helloMessage      = "Hello, this is bot for sharing my collection of books, use this buttons for continue."
+	sourceCodeMessage = "If you want to modify, or use this bot for your books collection, welcome to GitHub \nhttps://github.com/skvoch/burst"
 
-	menu = [][]tb.InlineButton{
-		[]tb.InlineButton{typesBtn, aboutBtn, sourceBtn},
-		// ...
+	menu = [][]tb.ReplyButton{
+		[]tb.ReplyButton{typesBtn, aboutBtn, sourceBtn},
 	}
 )
