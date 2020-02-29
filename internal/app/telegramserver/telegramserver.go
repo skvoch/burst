@@ -41,13 +41,12 @@ func (t *TelegramServer) Start() {
 func (t *TelegramServer) SetupHandlers() {
 	t.bot.Handle("/start", func(m *tb.Message) {
 		t.bot.Send(m.Sender, helloMessage, &tb.ReplyMarkup{
-			InlineKeyboard: menu,
+			ReplyKeyboard: menu,
 		})
 	})
 	// Menu handling
 
-	t.bot.Handle(&sourceBtn, func(c *tb.Callback) {
-		t.bot.Respond(c, &tb.CallbackResponse{Text: "If you want to modify, or close this the bot \n"})
-		t.bot.Send(c.Sender, "--")
+	t.bot.Handle(&sourceBtn, func(m *tb.Message) {
+		t.bot.Send(m.Sender, sourceCodeMessage)
 	})
 }
