@@ -1,49 +1,53 @@
 package telegramserver
 
 import (
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	"time"
+
 	"github.com/sirupsen/logrus"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+// TelegramServer ...
 type TelegramServer struct {
 	log    *logrus.Logger
 	config *Config
-	bot    *tgbotapi.BotAPI
+	bot    *tb.Bot
 }
 
-func New(config *Config) *TelegramServer {
+// New ...
+func New(config *Config) (*TelegramServer, error) {
+	bot, err := tb.NewBot(tb.Settings{
+		Token:  config.ApplicationToken,
+		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &TelegramServer{
 		config: config,
 		log:    logrus.New(),
-	}
+		bot:    bot,
+	}, nil
 }
 
+// Start ...
 func (t *TelegramServer) Start() {
-	t.log.Info("im here :)")
-	tgbot, err := tgbotapi.NewBotAPI(t.config.ApplicationToken)
+	t.bot.Start()
+}
 
-	if err != nil {
-		t.log.Fatal(err)
-	}
+// SetupHandlers ...
+func (t *TelegramServer) SetupHandlers() {
+	t.bot.Handle("/start", func(m *tb.Message) {
+		t.bot.Send(m.Sender, helloMessage, &tb.ReplyMarkup{
+			InlineKeyboard: menu,
+		})
+	})
+	// Menu handling
 
-	t.bot = tgbot
-	t.log.Info("starting telegram server, token:", t.config.ApplicationToken)
-
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	updates, err := t.bot.GetUpdatesChan(u)
-
-	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
-			continue
-		}
-
-		t.log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		msg.ReplyToMessageID = update.Message.MessageID
-
-		t.bot.Send(msg)
-	}
+	t.bot.Handle(&sourceBtn, func(c *tb.Callback) {
+		t.bot.Respond(c, &tb.CallbackResponse{Text: "If you want to modify, or close this the bot \n"})
+		t.bot.Send(c.Sender, "--")
+	})
 }

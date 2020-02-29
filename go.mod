@@ -16,4 +16,5 @@ require (
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/tools v0.0.0-20200214225126-5916a50871fb // indirect
+	gopkg.in/tucnak/telebot.v2 v2.0.0-20200209123123-209b6f88caa9
 )

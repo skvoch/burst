@@ -26,6 +26,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	server := telegramserver.New(config)
-	server.Start()
+	s, err := telegramserver.New(config)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	s.SetupHandlers()
+	s.Start()
 }
