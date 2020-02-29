@@ -40,13 +40,23 @@ func (t *TelegramServer) Start() {
 // SetupHandlers ...
 func (t *TelegramServer) SetupHandlers() {
 	t.bot.Handle("/start", func(m *tb.Message) {
+		var keys [][]tb.ReplyButton
+
+		if m.Sender.ID == t.config.OwnerID {
+			keys = menuWithEdit
+		} else {
+			keys = menu
+		}
+
 		t.bot.Send(m.Sender, helloMessage, &tb.ReplyMarkup{
-			ReplyKeyboard: menu,
+			ReplyKeyboard: keys,
 		})
 	})
 	// Menu handling
 
 	t.bot.Handle(&sourceBtn, func(m *tb.Message) {
+		t.log.Info(m.Sender.ID)
+
 		t.bot.Send(m.Sender, sourceCodeMessage)
 	})
 }

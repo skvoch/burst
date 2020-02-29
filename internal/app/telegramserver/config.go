@@ -3,13 +3,13 @@ package telegramserver
 // Config ...
 type Config struct {
 	ApplicationToken string `toml:"application_token"`
-	OwnerName        string `toml:"owner_name"`
+	OwnerID          int    `toml:"owner_id"`
 }
 
 // NewConfig ...
 func NewConfig() *Config {
 	return &Config{
 		ApplicationToken: "undefined",
-		OwnerName:        "undefined",
+		OwnerID:          0,
 	}
 }

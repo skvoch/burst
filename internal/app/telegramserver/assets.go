@@ -17,10 +17,19 @@ var (
 		Text: "💾 Source Code",
 	}
 
-	helloMessage      = "Hello, this is bot for sharing my collection of books, use this buttons for continue."
-	sourceCodeMessage = "If you want to modify, or use this bot for your books collection, welcome to GitHub \nhttps://github.com/skvoch/burst"
+	editButton = tb.ReplyButton{
+		Text: "⚙️ Edit content",
+	}
+
+	helloMessage      = "Hello, this is bot for sharing my collection of books, use buttons for continue."
+	sourceCodeMessage = "https://github.com/skvoch/burst"
 
 	menu = [][]tb.ReplyButton{
 		[]tb.ReplyButton{typesBtn, aboutBtn, sourceBtn},
+	}
+
+	menuWithEdit = [][]tb.ReplyButton{
+		[]tb.ReplyButton{typesBtn, aboutBtn, sourceBtn},
+		[]tb.ReplyButton{editButton},
 	}
 )
