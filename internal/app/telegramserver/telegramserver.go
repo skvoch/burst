@@ -12,6 +12,8 @@ type TelegramServer struct {
 	log    *logrus.Logger
 	config *Config
 	bot    *tb.Bot
+
+	conversations map[int]*Conversation
 }
 
 // New ...
