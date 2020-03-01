@@ -14,11 +14,15 @@ var (
 	}
 
 	sourceBtn = tb.ReplyButton{
-		Text: "💾 Source Code",
+		Text: "💾 Source code",
 	}
 
-	editButton = tb.ReplyButton{
-		Text: "⚙️ Edit content",
+	createTypeButton = tb.ReplyButton{
+		Text: "📁 Create type",
+	}
+
+	createBook = tb.ReplyButton{
+		Text: "📕 Create book",
 	}
 
 	helloMessage      = "Hello, this is bot for sharing my collection of books, use buttons for continue."
@@ -30,6 +34,6 @@ var (
 
 	menuWithEdit = [][]tb.ReplyButton{
 		[]tb.ReplyButton{typesBtn, aboutBtn, sourceBtn},
-		[]tb.ReplyButton{editButton},
+		[]tb.ReplyButton{createBook, createTypeButton},
 	}
 )

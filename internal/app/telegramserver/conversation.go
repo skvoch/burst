@@ -25,6 +25,8 @@ type Conversation interface {
 	SetText(text string) *Reply
 	SetDocument(doc tb.Document) *Reply
 	SetPhoto(photo tb.Photo) *Reply
+
+	CurrentText() string
 }
 
 // ConversationPart ...

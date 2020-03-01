@@ -1,7 +1,10 @@
 package telegramserver
 
 import (
+	"encoding/json"
+
 	"github.com/skvoch/burst/internal/app/model"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 // CreateTypeConversation ...
@@ -44,14 +47,36 @@ func (c *CreateTypeConversation) SetText(text string) *Reply {
 	current := c.currentPart()
 
 	if current.Want == Text {
-		current.Set(c._type, text)
+		current.Set(&c._type, text)
+		bytes, _ := json.Marshal(c._type)
+		text = string(bytes)
 
 		return &Reply{
 			IsEnd: c.isEnd(),
+			Text:  text,
 		}
 	}
 
 	return &Reply{}
+}
+
+// SetDocument ...
+func (c *CreateTypeConversation) SetDocument(text tb.Document) *Reply {
+
+	return &Reply{}
+}
+
+// SetPhoto ...
+func (c *CreateTypeConversation) SetPhoto(photo tb.Photo) *Reply {
+
+	return &Reply{}
+}
+
+// CurrentText ...
+func (c *CreateTypeConversation) CurrentText() string {
+	current := c.currentPart()
+
+	return current.Text
 }
 
 func (c *CreateTypeConversation) currentPart() *ConversationPart {

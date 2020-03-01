@@ -13,7 +13,8 @@ type TelegramServer struct {
 	config *Config
 	bot    *tb.Bot
 
-	conversations map[int]*Conversation
+	// Now supported only one conversation (for owner)
+	conversation Conversation
 }
 
 // New ...
@@ -55,22 +56,36 @@ func (t *TelegramServer) SetupHandlers() {
 		})
 	})
 
-	t.bot.Handle(tb.OnText, func(m *tb.Message) {
-		t.log.Info("text: ", m.Text)
-	})
-
-	t.bot.Handle(tb.OnPhoto, func(m *tb.Message) {
-
-		t.log.Info("photo: ", m.Sender.ID)
-	})
-
-	t.bot.Handle(tb.OnDocument, func(m *tb.Message) {
-		t.log.Info("document: ", m.Sender.ID)
-	})
-
 	t.bot.Handle(&sourceBtn, func(m *tb.Message) {
 		t.log.Info(m.Sender.ID)
 
 		t.bot.Send(m.Sender, sourceCodeMessage)
+	})
+
+	t.bot.Handle(tb.OnText, func(m *tb.Message) {
+
+		if m.Sender.ID == t.config.OwnerID {
+
+			if t.conversation != nil {
+				reply := t.conversation.SetText(m.Text)
+				t.bot.Send(m.Sender, reply.Text)
+			}
+		}
+	})
+
+	t.bot.Handle(tb.OnPhoto, func(m *tb.Message) {
+
+	})
+
+	t.bot.Handle(tb.OnDocument, func(m *tb.Message) {
+
+	})
+
+	t.bot.Handle(&createTypeButton, func(m *tb.Message) {
+		if m.Sender.ID == t.config.OwnerID {
+			t.conversation = NewCreateTypeConversation()
+
+			t.bot.Send(m.Sender, t.conversation.CurrentText())
+		}
 	})
 }
