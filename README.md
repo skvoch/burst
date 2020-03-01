@@ -10,6 +10,6 @@ Application to provide access to your book collection
 
 # Road map
 - RESTFul backend - done ✅
-- Telegram bot - in progress ⚙️
+- Telegram bot - in process ⚙️
 - Web UI - soon ⌛
 - Documentation and test coverage - ⌛
