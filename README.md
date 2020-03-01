@@ -9,7 +9,7 @@ Application to provide access to your book collection
 - Develop of this repository in process, he might has "private" tokens, and other trash, thank you for understanding.
 
 # Road map
-- RESTFul backend - done ✅
+- RESTFul API - done ✅
 - Telegram bot - in process ⚙️
 - Web UI - soon ⌛
 - Documentation and test coverage - ⌛
