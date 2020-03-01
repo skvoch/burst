@@ -5,7 +5,11 @@
 # Burst
 Application to provide access to your book collection
 
-# Features
-- coming soon
+# Warning 
+- Develop of this repository in process, he might has "private" tokens, and other trash, thank you for understanding.
 
-# Instalation
+# Road map
+- RESTFul backend - done ✅
+- Telegram bot - in progress ⚙️
+- Web UI - soon ⌛
+- Documentation and test coverage - ⌛
