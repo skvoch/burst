@@ -12,4 +12,4 @@ Application to provide access to your book collection
 - RESTFul API - done ✅
 - Telegram bot - in process ⚙️
 - Web UI - soon ⌛
-- Documentation and test coverage - ⌛
+- Documentation and test coverage - soon ⌛
