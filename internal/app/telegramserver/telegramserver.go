@@ -52,7 +52,19 @@ func (t *TelegramServer) SetupHandlers() {
 			ReplyKeyboard: keys,
 		})
 	})
-	// Menu handling
+
+	t.bot.Handle(tb.OnText, func(m *tb.Message) {
+		t.log.Info("text: ", m.Text)
+	})
+
+	t.bot.Handle(tb.OnPhoto, func(m *tb.Message) {
+
+		t.log.Info("photo: ", m.Sender.ID)
+	})
+
+	t.bot.Handle(tb.OnDocument, func(m *tb.Message) {
+		t.log.Info("document: ", m.Sender.ID)
+	})
 
 	t.bot.Handle(&sourceBtn, func(m *tb.Message) {
 		t.log.Info(m.Sender.ID)
