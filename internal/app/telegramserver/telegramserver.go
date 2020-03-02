@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/skvoch/burst/internal/app/telegramserver/conversations"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -14,7 +15,7 @@ type TelegramServer struct {
 	bot    *tb.Bot
 
 	// Now supported only one conversation (for owner)
-	conversation Conversation
+	conversation conversations.Conversation
 }
 
 // New ...
@@ -57,9 +58,35 @@ func (t *TelegramServer) SetupHandlers() {
 	})
 
 	t.bot.Handle(&sourceBtn, func(m *tb.Message) {
-		t.log.Info(m.Sender.ID)
-
 		t.bot.Send(m.Sender, sourceCodeMessage)
+	})
+
+	t.bot.Handle(tb.OnPhoto, func(m *tb.Message) {
+		if m.Sender.ID == t.config.OwnerID {
+
+			if t.conversation != nil {
+				reply := t.conversation.SetPhoto(m.Photo)
+				t.bot.Send(m.Sender, reply.Text)
+
+				if reply.IsEnd {
+					t.conversation = nil
+				}
+			}
+		}
+	})
+
+	t.bot.Handle(tb.OnDocument, func(m *tb.Message) {
+		if m.Sender.ID == t.config.OwnerID {
+
+			if t.conversation != nil {
+				reply := t.conversation.SetDocument(m.Document)
+				t.bot.Send(m.Sender, reply.Text)
+
+				if reply.IsEnd {
+					t.conversation = nil
+				}
+			}
+		}
 	})
 
 	t.bot.Handle(tb.OnText, func(m *tb.Message) {
@@ -69,21 +96,17 @@ func (t *TelegramServer) SetupHandlers() {
 			if t.conversation != nil {
 				reply := t.conversation.SetText(m.Text)
 				t.bot.Send(m.Sender, reply.Text)
+
+				if reply.IsEnd {
+					t.conversation = nil
+				}
 			}
 		}
 	})
 
-	t.bot.Handle(tb.OnPhoto, func(m *tb.Message) {
-
-	})
-
-	t.bot.Handle(tb.OnDocument, func(m *tb.Message) {
-
-	})
-
 	t.bot.Handle(&createTypeButton, func(m *tb.Message) {
 		if m.Sender.ID == t.config.OwnerID {
-			t.conversation = NewCreateTypeConversation()
+			t.conversation = conversations.NewCreateTypeConversation()
 
 			t.bot.Send(m.Sender, t.conversation.CurrentText())
 		}

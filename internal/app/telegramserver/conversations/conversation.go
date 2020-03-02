@@ -1,13 +1,13 @@
-package telegramserver
+package conversations
 
 import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-// ContentType ...
+// ContentType - type of contect for conversation
 type ContentType int
 
-// Types of content
+// ...
 const (
 	Text ContentType = iota
 	Photo
@@ -23,8 +23,8 @@ type Reply struct {
 // Conversation ...
 type Conversation interface {
 	SetText(text string) *Reply
-	SetDocument(doc tb.Document) *Reply
-	SetPhoto(photo tb.Photo) *Reply
+	SetDocument(doc *tb.Document) *Reply
+	SetPhoto(photo *tb.Photo) *Reply
 
 	CurrentText() string
 }

@@ -1,4 +1,4 @@
-package telegramserver
+package conversations
 
 import (
 	"encoding/json"
@@ -7,15 +7,16 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-// CreateTypeConversation ...
+// CreateTypeConversation - conversation for creating types of book, will ask custumer
+// about the Type name
 type CreateTypeConversation struct {
 	sequence ConversationSequence
 	_type    model.Type
 
-	current int
+	index int
 }
 
-// NewCreateTypeConversation ...
+// NewCreateTypeConversation helper function
 func NewCreateTypeConversation() *CreateTypeConversation {
 
 	sequence := ConversationSequence{
@@ -24,6 +25,8 @@ func NewCreateTypeConversation() *CreateTypeConversation {
 			ReplyText: "The type of book has been created",
 			Want:      Text,
 			Set: func(object interface{}, value interface{}) bool {
+
+				// This is looks ugly, I will refactor it later
 				_type, typeState := object.(*model.Type)
 				text, textState := value.(string)
 
@@ -51,28 +54,30 @@ func (c *CreateTypeConversation) SetText(text string) *Reply {
 		bytes, _ := json.Marshal(c._type)
 		text = string(bytes)
 
+		c.index++
+
 		return &Reply{
 			IsEnd: c.isEnd(),
-			Text:  text,
+			Text:  current.ReplyText,
 		}
 	}
 
 	return &Reply{}
 }
 
-// SetDocument ...
-func (c *CreateTypeConversation) SetDocument(text tb.Document) *Reply {
+// SetDocument unused in this conversation
+func (c *CreateTypeConversation) SetDocument(text *tb.Document) *Reply {
 
 	return &Reply{}
 }
 
-// SetPhoto ...
-func (c *CreateTypeConversation) SetPhoto(photo tb.Photo) *Reply {
+// SetPhoto unused in this conversation
+func (c *CreateTypeConversation) SetPhoto(photo *tb.Photo) *Reply {
 
 	return &Reply{}
 }
 
-// CurrentText ...
+// CurrentText providing text of current part of conversation
 func (c *CreateTypeConversation) CurrentText() string {
 	current := c.currentPart()
 
@@ -80,9 +85,9 @@ func (c *CreateTypeConversation) CurrentText() string {
 }
 
 func (c *CreateTypeConversation) currentPart() *ConversationPart {
-	return c.sequence[c.current]
+	return c.sequence[c.index]
 }
 
 func (c *CreateTypeConversation) isEnd() bool {
-	return c.current >= len(c.sequence)
+	return c.index >= len(c.sequence)
 }
