@@ -4,23 +4,23 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-// ContentType - type of contect for conversation
+// ContentType - type of content for conversation
 type ContentType int
 
-// ...
+// Enum
 const (
 	Text ContentType = iota
 	Photo
 	Document
 )
 
-// Reply ...
+// Reply - contains text reply for customer and end flag
 type Reply struct {
 	Text  string
 	IsEnd bool
 }
 
-// Conversation ...
+// Conversation providing interface for "sending" data, and getting replies
 type Conversation interface {
 	SetText(text string) *Reply
 	SetDocument(doc *tb.Document) *Reply
@@ -29,7 +29,7 @@ type Conversation interface {
 	CurrentText() string
 }
 
-// ConversationPart ...
+// ConversationPart providing interface for part of conversation
 type ConversationPart struct {
 	ReplyText string
 	Text      string
@@ -37,5 +37,5 @@ type ConversationPart struct {
 	Set       func(interface{}, interface{}) bool
 }
 
-// ConversationSequence ...
+// ConversationSequence sequence of conversation parts
 type ConversationSequence []*ConversationPart

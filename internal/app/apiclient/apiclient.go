@@ -22,9 +22,9 @@ type BurstClient struct {
 }
 
 // New ...
-func New(config *Config) (*BurstClient, error) {
+func New(serverAddr string) (*BurstClient, error) {
 	client := &BurstClient{
-		serverAddr: config.ServerAddr,
+		serverAddr: serverAddr,
 		client:     &http.Client{},
 	}
 

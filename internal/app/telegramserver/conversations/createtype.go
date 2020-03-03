@@ -1,8 +1,7 @@
 package conversations
 
 import (
-	"encoding/json"
-
+	"github.com/skvoch/burst/internal/app/apiclient"
 	"github.com/skvoch/burst/internal/app/model"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -11,13 +10,14 @@ import (
 // about the Type name
 type CreateTypeConversation struct {
 	sequence ConversationSequence
+	client   *apiclient.BurstClient
 	_type    model.Type
 
 	index int
 }
 
 // NewCreateTypeConversation helper function
-func NewCreateTypeConversation() *CreateTypeConversation {
+func NewCreateTypeConversation(client *apiclient.BurstClient) *CreateTypeConversation {
 
 	sequence := ConversationSequence{
 		&ConversationPart{
@@ -42,6 +42,7 @@ func NewCreateTypeConversation() *CreateTypeConversation {
 
 	return &CreateTypeConversation{
 		sequence: sequence,
+		client:   client,
 	}
 }
 
@@ -51,10 +52,13 @@ func (c *CreateTypeConversation) SetText(text string) *Reply {
 
 	if current.Want == Text {
 		current.Set(&c._type, text)
-		bytes, _ := json.Marshal(c._type)
-		text = string(bytes)
-
 		c.index++
+
+		isEnd := c.isEnd()
+
+		if isEnd {
+			c.client.CreateType(&c._type)
+		}
 
 		return &Reply{
 			IsEnd: c.isEnd(),
