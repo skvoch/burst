@@ -16,6 +16,8 @@ type TelegramServer struct {
 	bot    *tb.Bot
 	client *apiclient.BurstClient
 
+	handlers []func(m *tb.Message)
+
 	// Now supported only one conversation (for owner)
 	conversation conversations.Conversation
 }
@@ -60,6 +62,7 @@ func (t *TelegramServer) SetupHandlers() {
 
 	t.bot.Handle(&sourceBtn, t.handleSourceCodeButton)
 	t.bot.Handle(&createTypeButton, t.handleCreateTypeButton)
+	t.bot.Handle(&typesBtn, t.handleTypesButton)
 }
 
 func (t *TelegramServer) handleStart(m *tb.Message) {
@@ -85,6 +88,35 @@ func (t *TelegramServer) handleCreateTypeButton(m *tb.Message) {
 		t.conversation = conversations.NewCreateTypeConversation(t.client)
 
 		t.bot.Send(m.Sender, t.conversation.CurrentText())
+	}
+}
+
+func (t *TelegramServer) handleTypesButton(m *tb.Message) {
+	types, err := t.client.GetAllTypes()
+
+	if err != nil {
+		t.log.Error(err)
+	}
+
+	replyKeys := make([][]tb.InlineButton, 0)
+	keysRow := make([]tb.InlineButton, 0)
+
+	for _, _type := range types {
+		typeBtn := tb.InlineButton{Text: _type.Name}
+
+		t.bot.Handle(&typeBtn, func(c *tb.Callback) {
+			t.bot.Send(m.Sender, typeBtn.Text+" :>")
+		})
+
+		keysRow = append(keysRow, typeBtn)
+	}
+	replyKeys = append(replyKeys, keysRow)
+
+	_, err = t.bot.Send(m.Sender, "Has been found next types of books:",
+		&tb.ReplyMarkup{InlineKeyboard: replyKeys})
+
+	if err != nil {
+		t.log.Error(err)
 	}
 }
 
