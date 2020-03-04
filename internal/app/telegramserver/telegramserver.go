@@ -1,10 +1,12 @@
 package telegramserver
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/skvoch/burst/internal/app/apiclient"
+	"github.com/skvoch/burst/internal/app/model"
 	"github.com/skvoch/burst/internal/app/telegramserver/conversations"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -17,6 +19,9 @@ type TelegramServer struct {
 	client *apiclient.BurstClient
 
 	handlers []func(m *tb.Message)
+
+	// For each button for selecting types of books
+	typesCache map[string]*model.Type
 
 	// Now supported only one conversation (for owner)
 	conversation conversations.Conversation
@@ -40,10 +45,11 @@ func New(config *Config) (*TelegramServer, error) {
 	}
 
 	return &TelegramServer{
-		config: config,
-		log:    logrus.New(),
-		bot:    bot,
-		client: client,
+		config:     config,
+		log:        logrus.New(),
+		bot:        bot,
+		client:     client,
+		typesCache: make(map[string]*model.Type),
 	}, nil
 }
 
@@ -101,11 +107,26 @@ func (t *TelegramServer) handleTypesButton(m *tb.Message) {
 	replyKeys := make([][]tb.InlineButton, 0)
 	keysRow := make([]tb.InlineButton, 0)
 
-	for _, _type := range types {
-		typeBtn := tb.InlineButton{Text: _type.Name}
+	// Add handling of "dynamic" buttons
+	for index, _type := range types {
+		typeBtn := tb.InlineButton{
+			Text:   _type.Name,
+			Unique: "_" + strconv.Itoa(index),
+		}
+
+		t.typesCache[typeBtn.Text] = _type
 
 		t.bot.Handle(&typeBtn, func(c *tb.Callback) {
-			t.bot.Send(m.Sender, typeBtn.Text+" :>")
+			btnName := typeBtn.Text
+			typeID := t.typesCache[btnName].ID
+			books, err := t.client.GetBookIDs(typeID)
+
+			if err != nil {
+				return
+			}
+
+			t.bot.Send(m.Sender, strconv.Itoa(len(books)))
+			t.bot.Respond(c, &tb.CallbackResponse{})
 		})
 
 		keysRow = append(keysRow, typeBtn)
