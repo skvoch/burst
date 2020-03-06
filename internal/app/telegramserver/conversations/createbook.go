@@ -10,7 +10,7 @@ import (
 
 // CreateBookConversation conversation for creaing books
 type CreateBookConversation struct {
-	handler SequenceHandler
+	SequenceHandler
 
 	client *apiclient.BurstClient
 
@@ -62,7 +62,7 @@ func NewCreateBookConversation(client *apiclient.BurstClient) *CreateBookConvers
 		},
 	}
 
-	conversation.handler.sequence = sequence
+	conversation.setSequence(sequence)
 
 	return conversation
 }
@@ -161,6 +161,40 @@ func (c *CreateBookConversation) handleFile(object interface{}, value interface{
 	c.file = document
 
 	return true
+}
+
+func (c *CreateBookConversation) SetText(text string) *Reply {
+	current := c.CurrentPart()
+
+	if current.Want == Text {
+		current.Set(&c.book, text)
+		c.Next()
+
+		//isEnd := c.IsEnd()
+
+		//if isEnd {
+		//	c.client.CreateType(&c._type)
+		//}
+
+		return &Reply{
+			IsEnd: c.IsEnd(),
+			Text:  current.ReplyText,
+		}
+	}
+
+	return &Reply{}
+}
+
+// SetDocument unused in this conversation
+func (c *CreateBookConversation) SetDocument(text *tb.Document) *Reply {
+
+	return &Reply{}
+}
+
+// SetPhoto unused in this conversation
+func (c *CreateBookConversation) SetPhoto(photo *tb.Photo) *Reply {
+
+	return &Reply{}
 }
 
 func (c *CreateBookConversation) uploadBookData() {

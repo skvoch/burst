@@ -47,6 +47,10 @@ type SequenceHandler struct {
 	index int
 }
 
+func (c *SequenceHandler) setSequence(s ConversationSequence) {
+	c.sequence = s
+}
+
 // Next - incrase index counter
 func (c *SequenceHandler) Next() {
 	c.index++

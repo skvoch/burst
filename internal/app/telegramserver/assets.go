@@ -21,7 +21,7 @@ var (
 		Text: "📁 Create type",
 	}
 
-	createBook = tb.ReplyButton{
+	createBookButton = tb.ReplyButton{
 		Text: "📕 Create book",
 	}
 
@@ -34,6 +34,6 @@ var (
 
 	menuWithEdit = [][]tb.ReplyButton{
 		[]tb.ReplyButton{typesBtn, aboutBtn, sourceBtn},
-		[]tb.ReplyButton{createBook, createTypeButton},
+		[]tb.ReplyButton{createBookButton, createTypeButton},
 	}
 )

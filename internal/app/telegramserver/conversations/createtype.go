@@ -9,7 +9,7 @@ import (
 // CreateTypeConversation - conversation for creating types of book, will ask custumer
 // about the Type name
 type CreateTypeConversation struct {
-	handler SequenceHandler
+	SequenceHandler
 
 	client *apiclient.BurstClient
 	_type  model.Type
@@ -40,29 +40,27 @@ func NewCreateTypeConversation(client *apiclient.BurstClient) *CreateTypeConvers
 	}
 
 	return &CreateTypeConversation{
-		handler: SequenceHandler{
-			sequence: sequence,
-		},
-		client: client,
+		SequenceHandler: SequenceHandler{sequence: sequence},
+		client:          client,
 	}
 }
 
 // SetText ...
 func (c *CreateTypeConversation) SetText(text string) *Reply {
-	current := c.handler.CurrentPart()
+	current := c.CurrentPart()
 
 	if current.Want == Text {
 		current.Set(&c._type, text)
-		c.handler.Next()
+		c.Next()
 
-		isEnd := c.handler.IsEnd()
+		isEnd := c.IsEnd()
 
 		if isEnd {
 			c.client.CreateType(&c._type)
 		}
 
 		return &Reply{
-			IsEnd: c.handler.IsEnd(),
+			IsEnd: c.IsEnd(),
 			Text:  current.ReplyText,
 		}
 	}
@@ -80,11 +78,4 @@ func (c *CreateTypeConversation) SetDocument(text *tb.Document) *Reply {
 func (c *CreateTypeConversation) SetPhoto(photo *tb.Photo) *Reply {
 
 	return &Reply{}
-}
-
-// CurrentText providing text of current part of conversation
-func (c *CreateTypeConversation) CurrentText() string {
-	current := c.handler.CurrentPart()
-
-	return current.Text
 }

@@ -68,6 +68,8 @@ func (t *TelegramServer) SetupHandlers() {
 
 	t.bot.Handle(&sourceBtn, t.handleSourceCodeButton)
 	t.bot.Handle(&createTypeButton, t.handleCreateTypeButton)
+	t.bot.Handle(&createBookButton, t.handleCreateBookButton)
+
 	t.bot.Handle(&typesBtn, t.handleTypesButton)
 }
 
@@ -92,6 +94,14 @@ func (t *TelegramServer) handleSourceCodeButton(m *tb.Message) {
 func (t *TelegramServer) handleCreateTypeButton(m *tb.Message) {
 	if m.Sender.ID == t.config.OwnerID {
 		t.conversation = conversations.NewCreateTypeConversation(t.client)
+
+		t.bot.Send(m.Sender, t.conversation.CurrentText())
+	}
+}
+
+func (t *TelegramServer) handleCreateBookButton(m *tb.Message) {
+	if m.Sender.ID == t.config.OwnerID {
+		t.conversation = conversations.NewCreateBookConversation(t.client)
 
 		t.bot.Send(m.Sender, t.conversation.CurrentText())
 	}
