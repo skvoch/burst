@@ -39,3 +39,32 @@ type ConversationPart struct {
 
 // ConversationSequence sequence of conversation parts
 type ConversationSequence []*ConversationPart
+
+// SequenceHandler providing functional for handing conversation sequence
+type SequenceHandler struct {
+	sequence ConversationSequence
+
+	index int
+}
+
+// Next - incrase index counter
+func (c *SequenceHandler) Next() {
+	c.index++
+}
+
+// CurrentPart return current part of sequence
+func (c *SequenceHandler) CurrentPart() *ConversationPart {
+	return c.sequence[c.index]
+}
+
+// IsEnd ...
+func (c *SequenceHandler) IsEnd() bool {
+	return c.index >= len(c.sequence)
+}
+
+// CurrentText providing text of current part of conversation
+func (c *SequenceHandler) CurrentText() string {
+	current := c.CurrentPart()
+
+	return current.Text
+}

@@ -9,11 +9,10 @@ import (
 // CreateTypeConversation - conversation for creating types of book, will ask custumer
 // about the Type name
 type CreateTypeConversation struct {
-	sequence ConversationSequence
-	client   *apiclient.BurstClient
-	_type    model.Type
+	handler SequenceHandler
 
-	index int
+	client *apiclient.BurstClient
+	_type  model.Type
 }
 
 // NewCreateTypeConversation helper function
@@ -21,7 +20,7 @@ func NewCreateTypeConversation(client *apiclient.BurstClient) *CreateTypeConvers
 
 	sequence := ConversationSequence{
 		&ConversationPart{
-			Text:      "Let's create new type of books, enter type name:",
+			Text:      "Let's create a new type of books, enter type name:",
 			ReplyText: "The type of book has been created",
 			Want:      Text,
 			Set: func(object interface{}, value interface{}) bool {
@@ -41,27 +40,29 @@ func NewCreateTypeConversation(client *apiclient.BurstClient) *CreateTypeConvers
 	}
 
 	return &CreateTypeConversation{
-		sequence: sequence,
-		client:   client,
+		handler: SequenceHandler{
+			sequence: sequence,
+		},
+		client: client,
 	}
 }
 
 // SetText ...
 func (c *CreateTypeConversation) SetText(text string) *Reply {
-	current := c.currentPart()
+	current := c.handler.CurrentPart()
 
 	if current.Want == Text {
 		current.Set(&c._type, text)
-		c.index++
+		c.handler.Next()
 
-		isEnd := c.isEnd()
+		isEnd := c.handler.IsEnd()
 
 		if isEnd {
 			c.client.CreateType(&c._type)
 		}
 
 		return &Reply{
-			IsEnd: c.isEnd(),
+			IsEnd: c.handler.IsEnd(),
 			Text:  current.ReplyText,
 		}
 	}
@@ -83,15 +84,7 @@ func (c *CreateTypeConversation) SetPhoto(photo *tb.Photo) *Reply {
 
 // CurrentText providing text of current part of conversation
 func (c *CreateTypeConversation) CurrentText() string {
-	current := c.currentPart()
+	current := c.handler.CurrentPart()
 
 	return current.Text
-}
-
-func (c *CreateTypeConversation) currentPart() *ConversationPart {
-	return c.sequence[c.index]
-}
-
-func (c *CreateTypeConversation) isEnd() bool {
-	return c.index >= len(c.sequence)
 }
