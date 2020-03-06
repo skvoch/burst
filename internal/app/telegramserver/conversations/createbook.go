@@ -1,6 +1,7 @@
 package conversations
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/skvoch/burst/internal/app/apiclient"
@@ -21,7 +22,9 @@ type CreateBookConversation struct {
 
 // NewCreateBookConversation helper function
 func NewCreateBookConversation(client *apiclient.BurstClient) *CreateBookConversation {
-	conversation := &CreateBookConversation{}
+	conversation := &CreateBookConversation{
+		client: client,
+	}
 
 	sequence := ConversationSequence{
 		&ConversationPart{
@@ -51,13 +54,13 @@ func NewCreateBookConversation(client *apiclient.BurstClient) *CreateBookConvers
 		},
 		&ConversationPart{
 			Text: "Please send preview file:",
-			Want: Text,
+			Want: Photo,
 			Set:  conversation.handlePreview,
 		},
 		&ConversationPart{
 			Text:      "Please send PDF file:",
 			ReplyText: "The book has been created",
-			Want:      Text,
+			Want:      Document,
 			Set:       conversation.handleFile,
 		},
 	}
@@ -163,6 +166,7 @@ func (c *CreateBookConversation) handleFile(object interface{}, value interface{
 	return true
 }
 
+// SetText ...
 func (c *CreateBookConversation) SetText(text string) *Reply {
 	current := c.CurrentPart()
 
@@ -170,11 +174,11 @@ func (c *CreateBookConversation) SetText(text string) *Reply {
 		current.Set(&c.book, text)
 		c.Next()
 
-		//isEnd := c.IsEnd()
+		isEnd := c.IsEnd()
 
-		//if isEnd {
-		//	c.client.CreateType(&c._type)
-		//}
+		if isEnd {
+			c.uploadBookData()
+		}
 
 		return &Reply{
 			IsEnd: c.IsEnd(),
@@ -188,15 +192,51 @@ func (c *CreateBookConversation) SetText(text string) *Reply {
 // SetDocument unused in this conversation
 func (c *CreateBookConversation) SetDocument(text *tb.Document) *Reply {
 
+	current := c.CurrentPart()
+
+	if current.Want == Text {
+		current.Set(&c.book, Document)
+		c.Next()
+
+		isEnd := c.IsEnd()
+
+		if isEnd {
+			c.uploadBookData()
+		}
+
+		return &Reply{
+			IsEnd: c.IsEnd(),
+			Text:  current.ReplyText,
+		}
+	}
+
 	return &Reply{}
 }
 
 // SetPhoto unused in this conversation
 func (c *CreateBookConversation) SetPhoto(photo *tb.Photo) *Reply {
 
+	current := c.CurrentPart()
+
+	if current.Want == Photo {
+		current.Set(&c.book, photo)
+		c.Next()
+
+		isEnd := c.IsEnd()
+
+		if isEnd {
+			c.uploadBookData()
+		}
+
+		return &Reply{
+			IsEnd: c.IsEnd(),
+			Text:  current.ReplyText,
+		}
+	}
+
 	return &Reply{}
 }
 
 func (c *CreateBookConversation) uploadBookData() {
-
+	log.Println(c.book)
 }
