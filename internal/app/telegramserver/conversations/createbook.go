@@ -16,7 +16,7 @@ type CreateBookConversation struct {
 	client *apiclient.BurstClient
 
 	book    model.Book
-	preview *tb.Photo
+	preview *tb.Document
 	file    *tb.Document
 }
 
@@ -54,7 +54,7 @@ func NewCreateBookConversation(client *apiclient.BurstClient) *CreateBookConvers
 		},
 		&ConversationPart{
 			Text: "Please send preview file:",
-			Want: Photo,
+			Want: Document,
 			Set:  conversation.handlePreview,
 		},
 		&ConversationPart{
@@ -153,7 +153,7 @@ func (c *CreateBookConversation) handleBookRating(object interface{}, value inte
 
 func (c *CreateBookConversation) handlePreview(object interface{}, value interface{}) bool {
 
-	photo := value.(*tb.Photo)
+	photo := value.(*tb.Document)
 	c.preview = photo
 
 	return true
@@ -190,12 +190,12 @@ func (c *CreateBookConversation) SetText(text string) *Reply {
 }
 
 // SetDocument unused in this conversation
-func (c *CreateBookConversation) SetDocument(text *tb.Document) *Reply {
+func (c *CreateBookConversation) SetDocument(doc *tb.Document) *Reply {
 
 	current := c.CurrentPart()
 
-	if current.Want == Text {
-		current.Set(&c.book, Document)
+	if current.Want == Document {
+		current.Set(&c.book, doc)
 		c.Next()
 
 		isEnd := c.IsEnd()

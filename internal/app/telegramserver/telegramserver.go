@@ -171,8 +171,13 @@ func (t *TelegramServer) handleDocument(m *tb.Message) {
 
 		if t.conversation != nil {
 			reply := t.conversation.SetDocument(m.Document)
-			t.bot.Send(m.Sender, reply.Text)
+			_, err := t.bot.Send(m.Sender, reply.Text)
+			t.log.Info(err)
+
+			_, err = t.bot.Send(m.Sender, t.conversation.CurrentText())
 			t.bot.Send(m.Sender, t.conversation.CurrentText)
+
+			t.log.Info(err)
 
 			if reply.IsEnd {
 				t.conversation = nil
@@ -190,6 +195,7 @@ func (t *TelegramServer) handleText(m *tb.Message) {
 			t.log.Info(err)
 
 			_, err = t.bot.Send(m.Sender, t.conversation.CurrentText())
+			t.bot.Send(m.Sender, t.conversation.CurrentText)
 
 			t.log.Info(err)
 
