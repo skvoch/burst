@@ -1,6 +1,7 @@
 package telegramserver
 
 import (
+	"bytes"
 	"strconv"
 	"time"
 
@@ -172,10 +173,29 @@ func (t *TelegramServer) sendBookList(user *tb.User, typeID int) {
 		textMessage += "Review: " + book.Review
 		textMessage += "\n"
 		textMessage += "Rating: " + renderRatingToEmoji(book.Rating)
-
 		textMessage += "\n"
-
+		textMessage += "\n"
 		t.bot.Send(user, textMessage)
+
+		previewResponse := t.client.GetBookPreview(book.ID)
+		previewReader := bytes.NewReader(previewResponse.Data)
+		preview := &tb.Photo{
+			File:   tb.FromReader(previewReader),
+			Width:  100,
+			Height: 100,
+		}
+		_, err = t.bot.Send(user, preview)
+		t.log.Error(err)
+
+		fileResponse := t.client.GetBookFile(book.ID)
+		fileReader := bytes.NewReader(fileResponse.Data)
+		file := &tb.Document{
+			File:     tb.FromReader(fileReader),
+			FileName: fileResponse.FileName,
+		}
+		t.bot.Send(user, file)
+
+		t.bot.Send(user, "\n")
 	}
 }
 
