@@ -62,7 +62,6 @@ func (t *TelegramServer) Start() {
 func (t *TelegramServer) SetupHandlers() {
 	t.bot.Handle("/start", t.handleStart)
 
-	t.bot.Handle(tb.OnPhoto, t.handlePhoto)
 	t.bot.Handle(tb.OnDocument, t.handleDocument)
 	t.bot.Handle(tb.OnText, t.handleText)
 
@@ -129,13 +128,11 @@ func (t *TelegramServer) handleTypesButton(m *tb.Message) {
 		t.bot.Handle(&typeBtn, func(c *tb.Callback) {
 			btnName := typeBtn.Text
 			typeID := t.typesCache[btnName].ID
-			books, err := t.client.GetBookIDs(typeID)
 
 			if err != nil {
 				return
 			}
-
-			t.bot.Send(m.Sender, strconv.Itoa(len(books)))
+			t.sendBookList(m.Sender, typeID)
 			t.bot.Respond(c, &tb.CallbackResponse{})
 		})
 
@@ -143,7 +140,7 @@ func (t *TelegramServer) handleTypesButton(m *tb.Message) {
 	}
 	replyKeys = append(replyKeys, keysRow)
 
-	_, err = t.bot.Send(m.Sender, "Has been found next types of books:",
+	_, err = t.bot.Send(m.Sender, "📖",
 		&tb.ReplyMarkup{InlineKeyboard: replyKeys})
 
 	if err != nil {
@@ -151,18 +148,34 @@ func (t *TelegramServer) handleTypesButton(m *tb.Message) {
 	}
 }
 
-func (t *TelegramServer) handlePhoto(m *tb.Message) {
-	if m.Sender.ID == t.config.OwnerID {
+func (t *TelegramServer) sendBookList(user *tb.User, typeID int) {
 
-		if t.conversation != nil {
-			reply := t.conversation.SetPhoto(m.Photo)
-			t.bot.Send(m.Sender, reply.Text)
-			t.bot.Send(m.Sender, t.conversation.CurrentText)
+	books, err := t.client.GetBookIDs(typeID)
 
-			if reply.IsEnd {
-				t.conversation = nil
-			}
+	if err != nil {
+		t.log.Error(err)
+	}
+
+	for _, id := range books {
+		book, err := t.client.GetBookByID(id)
+
+		if err != nil {
+			t.log.Error("Cannot get book by ID:", err)
+			continue
 		}
+		textMessage := ""
+
+		textMessage += "Name: " + book.Name
+		textMessage += "\n"
+		textMessage += "Description: " + book.Description
+		textMessage += "\n"
+		textMessage += "Review: " + book.Review
+		textMessage += "\n"
+		textMessage += "Rating: " + renderRatingToEmoji(book.Rating)
+
+		textMessage += "\n"
+
+		t.bot.Send(user, textMessage)
 	}
 }
 
