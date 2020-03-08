@@ -13,7 +13,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&configPath, "config-path", "/Volumes/Macintosh HD/Projects/burst/configs/telegram.toml", "path to config file")
+	flag.StringVar(&configPath, "config-path", "telegram.toml", "path to config file")
 }
 
 func main() {
