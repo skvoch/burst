@@ -1,9 +1,9 @@
 package conversations
 
 import (
-	"log"
 	"strconv"
 
+	"github.com/sirupsen/logrus"
 	"github.com/skvoch/burst/internal/app/apiclient"
 	"github.com/skvoch/burst/internal/app/model"
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -14,6 +14,7 @@ type CreateBookConversation struct {
 	SequenceHandler
 
 	client *apiclient.BurstClient
+	log    *logrus.Logger
 
 	book    model.Book
 	preview *tb.Document
@@ -21,9 +22,10 @@ type CreateBookConversation struct {
 }
 
 // NewCreateBookConversation helper function
-func NewCreateBookConversation(client *apiclient.BurstClient) *CreateBookConversation {
+func NewCreateBookConversation(client *apiclient.BurstClient, log *logrus.Logger) *CreateBookConversation {
 	conversation := &CreateBookConversation{
 		client: client,
+		log:    log,
 	}
 
 	sequence := ConversationSequence{
@@ -238,5 +240,24 @@ func (c *CreateBookConversation) SetPhoto(photo *tb.Photo) *Reply {
 }
 
 func (c *CreateBookConversation) uploadBookData() {
-	log.Println(c.book)
+	tokens, err := c.client.CreateBook(&c.book)
+
+	if err != nil {
+		c.log.Println("Cannot create book:", err)
+		return
+	}
+
+	filePath := c.file.FileLocal
+	if err := c.client.SendBookFile(filePath, tokens.BookID, tokens.FileUUID); err != nil {
+		c.log.Error("Cannot upload book file:", err)
+		return
+	}
+
+	previewPath := c.preview.FileLocal
+	if err := c.client.SendBookFile(previewPath, tokens.BookID, tokens.PreviewUUID); err != nil {
+		c.log.Error("Cannot upload book preview:", err)
+		return
+	}
+
+	c.log.Info("The book has been created")
 }

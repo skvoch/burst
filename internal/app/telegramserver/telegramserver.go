@@ -101,7 +101,7 @@ func (t *TelegramServer) handleCreateTypeButton(m *tb.Message) {
 
 func (t *TelegramServer) handleCreateBookButton(m *tb.Message) {
 	if m.Sender.ID == t.config.OwnerID {
-		t.conversation = conversations.NewCreateBookConversation(t.client)
+		t.conversation = conversations.NewCreateBookConversation(t.client, t.log)
 
 		t.bot.Send(m.Sender, t.conversation.CurrentText())
 	}
@@ -168,16 +168,21 @@ func (t *TelegramServer) handlePhoto(m *tb.Message) {
 
 func (t *TelegramServer) handleDocument(m *tb.Message) {
 	if m.Sender.ID == t.config.OwnerID {
-
 		if t.conversation != nil {
+
+			if err := t.bot.Download(&m.Document.File, m.Document.FileName); err != nil {
+				t.log.Error("Cannot download file from Telegram:", err)
+			}
+
 			reply := t.conversation.SetDocument(m.Document)
-			_, err := t.bot.Send(m.Sender, reply.Text)
-			t.log.Info(err)
 
-			_, err = t.bot.Send(m.Sender, t.conversation.CurrentText())
-			t.bot.Send(m.Sender, t.conversation.CurrentText)
+			if reply.Text != "" {
+				t.bot.Send(m.Sender, reply.Text)
+			}
 
-			t.log.Info(err)
+			if t.conversation.CurrentText() != "" {
+				t.bot.Send(m.Sender, t.conversation.CurrentText())
+			}
 
 			if reply.IsEnd {
 				t.conversation = nil
@@ -190,14 +195,16 @@ func (t *TelegramServer) handleText(m *tb.Message) {
 	if m.Sender.ID == t.config.OwnerID {
 
 		if t.conversation != nil {
+
 			reply := t.conversation.SetText(m.Text)
-			_, err := t.bot.Send(m.Sender, reply.Text)
-			t.log.Info(err)
 
-			_, err = t.bot.Send(m.Sender, t.conversation.CurrentText())
-			t.bot.Send(m.Sender, t.conversation.CurrentText)
+			if reply.Text != "" {
+				t.bot.Send(m.Sender, reply.Text)
+			}
 
-			t.log.Info(err)
+			if t.conversation.CurrentText() != "" {
+				t.bot.Send(m.Sender, t.conversation.CurrentText())
+			}
 
 			if reply.IsEnd {
 				t.conversation = nil
