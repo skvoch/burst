@@ -282,8 +282,8 @@ func (b *BurstClient) GetBookFile(ID int) *FileResponse {
 	return &FileResponse{FileName: fileName, Data: bodyBytes, Err: nil}
 }
 
-// SendPreviewFile ...
-func (b *BurstClient) SendPreviewFile(filePath string, bookID int, UUID string) error {
+// SendPreview ...
+func (b *BurstClient) SendPreview(filePath string, bookID int, UUID string) error {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/preview/")
 
 	file, err := os.Open(filePath)

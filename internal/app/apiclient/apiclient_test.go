@@ -123,7 +123,7 @@ func TestGetBookPreview(t *testing.T) {
 	defer os.Remove(file.Name())
 	file.Write(previewData)
 
-	err = client.SendPreviewFile(file.Name(), book.ID, tokens.PreviewUUID)
+	err = client.SendPreview(file.Name(), book.ID, tokens.PreviewUUID)
 	assert.NoError(t, err)
 
 	fileRespond := client.GetBookPreview(tokens.BookID)

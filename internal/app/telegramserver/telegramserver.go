@@ -170,8 +170,10 @@ func (t *TelegramServer) handleDocument(m *tb.Message) {
 	if m.Sender.ID == t.config.OwnerID {
 		if t.conversation != nil {
 
-			if err := t.bot.Download(&m.Document.File, m.Document.FileName); err != nil {
-				t.log.Error("Cannot download file from Telegram:", err)
+			if m.Document.OnDisk() == false {
+				if err := t.bot.Download(&m.Document.File, m.Document.FileName); err != nil {
+					t.log.Error("Cannot download file from Telegram:", err)
+				}
 			}
 
 			reply := t.conversation.SetDocument(m.Document)
@@ -180,12 +182,13 @@ func (t *TelegramServer) handleDocument(m *tb.Message) {
 				t.bot.Send(m.Sender, reply.Text)
 			}
 
-			if t.conversation.CurrentText() != "" {
-				t.bot.Send(m.Sender, t.conversation.CurrentText())
-			}
-
 			if reply.IsEnd {
 				t.conversation = nil
+				return
+			}
+
+			if t.conversation.CurrentText() != "" {
+				t.bot.Send(m.Sender, t.conversation.CurrentText())
 			}
 		}
 	}
@@ -202,12 +205,13 @@ func (t *TelegramServer) handleText(m *tb.Message) {
 				t.bot.Send(m.Sender, reply.Text)
 			}
 
-			if t.conversation.CurrentText() != "" {
-				t.bot.Send(m.Sender, t.conversation.CurrentText())
-			}
-
 			if reply.IsEnd {
 				t.conversation = nil
+				return
+			}
+
+			if t.conversation.CurrentText() != "" {
+				t.bot.Send(m.Sender, t.conversation.CurrentText())
 			}
 		}
 	}

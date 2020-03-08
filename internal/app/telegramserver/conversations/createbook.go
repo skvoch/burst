@@ -155,8 +155,8 @@ func (c *CreateBookConversation) handleBookRating(object interface{}, value inte
 
 func (c *CreateBookConversation) handlePreview(object interface{}, value interface{}) bool {
 
-	photo := value.(*tb.Document)
-	c.preview = photo
+	document := value.(*tb.Document)
+	c.preview = document
 
 	return true
 }
@@ -218,24 +218,6 @@ func (c *CreateBookConversation) SetDocument(doc *tb.Document) *Reply {
 // SetPhoto unused in this conversation
 func (c *CreateBookConversation) SetPhoto(photo *tb.Photo) *Reply {
 
-	current := c.CurrentPart()
-
-	if current.Want == Photo {
-		current.Set(&c.book, photo)
-		c.Next()
-
-		isEnd := c.IsEnd()
-
-		if isEnd {
-			c.uploadBookData()
-		}
-
-		return &Reply{
-			IsEnd: c.IsEnd(),
-			Text:  current.ReplyText,
-		}
-	}
-
 	return &Reply{}
 }
 
@@ -254,7 +236,7 @@ func (c *CreateBookConversation) uploadBookData() {
 	}
 
 	previewPath := c.preview.FileLocal
-	if err := c.client.SendBookFile(previewPath, tokens.BookID, tokens.PreviewUUID); err != nil {
+	if err := c.client.SendPreview(previewPath, tokens.BookID, tokens.PreviewUUID); err != nil {
 		c.log.Error("Cannot upload book preview:", err)
 		return
 	}
