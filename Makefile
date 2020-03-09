@@ -1,8 +1,8 @@
 .PH0NY: build
 
 build:
-	go build -v ./cmd/burst
-	go build -v ./cmd/telegram
+	go build -o ./bin/ -v ./cmd/burst
+	go build -o ./bin/ -v ./cmd/telegram
 
 test:
 	go test -v -race ./...

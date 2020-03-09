@@ -14,9 +14,10 @@ var (
 )
 
 func init() {
-	flag.StringVar(&configPath, "config-path", "configs/apiserver.toml", "path to config file")
+	flag.StringVar(&configPath, "config-path", "../configs/apiserver.toml", "path to config file")
 }
 
+// Override config fields if env variables is set
 func setEnviromentVaribles(c *apiserver.Config) {
 	envDatabaseURL := os.Getenv("DATABASE_URL")
 

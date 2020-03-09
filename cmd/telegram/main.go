@@ -15,7 +15,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&configPath, "config-path", "telegram.toml", "path to config file")
+	flag.StringVar(&configPath, "config-path", "../configs/telegram.toml", "path to config file")
 }
 
 // Override config fields if env variables is set
