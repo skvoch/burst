@@ -1,4 +1,4 @@
-bind_addr = "localhost:8080"
+bind_addr = "localhost:9000"
 log_level = "debug"
 files_directory = "/tmp/"
 previews_directory = "/tmp/"
