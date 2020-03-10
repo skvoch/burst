@@ -1,6 +1,6 @@
 package model
 
-// Book ...
+// Book - entity with information of book
 type Book struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
@@ -12,6 +12,7 @@ type Book struct {
 	PreviewPath string `json:"preview_path,omitempty"`
 }
 
+// Sanitaize - remove private paths
 func (b *Book) Sanitaize() {
 	b.FilePath = ""
 	b.PreviewPath = ""

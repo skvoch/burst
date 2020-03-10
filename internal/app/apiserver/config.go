@@ -1,6 +1,6 @@
 package apiserver
 
-// Config ...
+// Config - has fields for Burst server
 type Config struct {
 	BindAddr          string `toml:"bind_addr"`
 	LogLevel          string `toml:"log_level"`
@@ -9,7 +9,7 @@ type Config struct {
 	PreviewsDirectory string `toml:"previews_directory"`
 }
 
-// NewConfig ...
+// NewConfig - helper function
 func NewConfig() *Config {
 	return &Config{
 		BindAddr: ":8080",

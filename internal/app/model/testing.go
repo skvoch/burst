@@ -1,5 +1,6 @@
 package model
 
+// NewTestBook - hepler function for testing
 func NewTestBook() *Book {
 	return &Book{
 		ID:          0,
@@ -11,6 +12,7 @@ func NewTestBook() *Book {
 	}
 }
 
+// NewTestBookWithType - hepler function for testing
 func NewTestBookWithType(typeID int) *Book {
 	return &Book{
 		ID:          0,
@@ -22,6 +24,7 @@ func NewTestBookWithType(typeID int) *Book {
 	}
 }
 
+// NewTestType - hepler function for testing
 func NewTestType() *Type {
 	return &Type{
 		ID:   0,

@@ -1,6 +1,6 @@
 package apiclient
 
-// UnableConnectToServer ...
+// UnableConnectToServer - 404
 type UnableConnectToServer struct {
 }
 
@@ -8,7 +8,7 @@ func (u *UnableConnectToServer) Error() string {
 	return "unable connect to Burst server"
 }
 
-// WrongResponseStatus ...
+// WrongResponseStatus - when server sent unexpected status code
 type WrongResponseStatus struct {
 }
 

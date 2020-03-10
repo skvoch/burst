@@ -1,6 +1,6 @@
 package apiclient
 
-// NewTestClient ...
+// NewTestClient - helper function for testing
 func NewTestClient(URL string) (*BurstClient, error) {
 	config := NewConfig()
 	config.ServerAddr = "http://localhost:8080"
