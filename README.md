@@ -5,8 +5,8 @@
 # Burst
 Application to provide access to your book collection
 
-# Warning 
-- The development of this repository, in process, he might has "private" tokens, and other trash, thank you for understanding.
+# Warning
+- I decided that I fulfilled all my goals with this project, anyway if you want to modify something - do that.
 
 # Road map
 - RESTful API - ✅
