@@ -9,6 +9,6 @@ Application to provide access to your book collection
 - The development of this repository, in process, he might has "private" tokens, and other trash, thank you for understanding.
 
 # Road map
-- RESTful API - done ✅
-- Telegram bot - in process ✅
-- Documentation and test coverage - soon ✅
+- RESTful API - ✅
+- Telegram bot -  ✅
+- Documentation - ✅
