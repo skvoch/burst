@@ -5,7 +5,7 @@
 # Burst
 Application to provide access to your book collection
 <p align="center">
-  <img width="250" align="center" alt="portfolio_view" src="images/telegram.png">
+  <img width="800" align="center" alt="portfolio_view" src="images/telegram.png">
 </p>
 
 # Warning
