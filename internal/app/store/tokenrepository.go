@@ -2,7 +2,7 @@ package store
 
 import "github.com/skvoch/burst/internal/app/model"
 
-// PDFTokenRepository ...
+// PDFTokenRepository - provide access to manipulating with tokens for uploading files
 type PDFTokenRepository interface {
 	Create(b *model.PDFToken) error
 	GetByUID(UID string) (*model.PDFToken, error)
@@ -10,7 +10,7 @@ type PDFTokenRepository interface {
 	RemoveAll() error
 }
 
-// PDFTokenRepository ...
+// PreviewTokenRepository - provide access to manipulating with tokens for uploading previews
 type PreviewTokenRepository interface {
 	Create(b *model.PreviewToken) error
 	GetByUID(UID string) (*model.PreviewToken, error)

@@ -1,6 +1,6 @@
 package store
 
-// Store ...
+// Store - this interface aggregate all repositories
 type Store interface {
 	Books() BooksRepository
 	Types() TypesRepository
