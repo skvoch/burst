@@ -10,6 +10,5 @@ Application to provide access to your book collection
 
 # Road map
 - RESTful API - done ✅
-- Telegram bot - in process ⚙️
-- Web UI - soon ⌛
-- Documentation and test coverage - soon ⌛
+- Telegram bot - in process ✅
+- Documentation and test coverage - soon ✅
