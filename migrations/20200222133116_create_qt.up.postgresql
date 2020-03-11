@@ -1,4 +1,0 @@
-CREATE TABLE qt (
-uid text not null primary key,
-bookID integer REFERENCES books(id),
-joke integer);
