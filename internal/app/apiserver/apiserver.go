@@ -8,7 +8,7 @@ import (
 	"github.com/skvoch/burst/internal/app/store/psqlstore"
 )
 
-// Start ...
+// Start - make new storage, and start HTTP server
 func Start(config *Config) error {
 
 	db, err := newDB(config.DataBaseURL)

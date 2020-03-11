@@ -9,17 +9,17 @@ type BookUploadTokens struct {
 	PreviewUUID string `json:"preview_uuid"`
 }
 
-// GetBooksIDsResponse ...
+// GetBooksIDsResponse - reposnse with books ids
 type GetBooksIDsResponse struct {
 	BooksIDs []int `json:"books_ids"`
 }
 
-// CreateTypeResponse ...
+// CreateTypeResponse - response with id of created type
 type CreateTypeResponse struct {
 	ID int `json:"ID"`
 }
 
-// FileResponse ...
+// FileResponse - response with data of file and meta information
 type FileResponse struct {
 	Data     []byte
 	FileName string

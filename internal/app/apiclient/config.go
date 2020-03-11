@@ -1,11 +1,11 @@
 package apiclient
 
-// Config ...
+// Config - has only Burst server addr
 type Config struct {
 	ServerAddr string `toml:"server_addr"`
 }
 
-// NewConfig ...
+// NewConfig - helper function
 func NewConfig() *Config {
 	return &Config{}
 }

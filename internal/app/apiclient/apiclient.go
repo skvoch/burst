@@ -21,7 +21,7 @@ type BurstClient struct {
 	client     *http.Client
 }
 
-// New ...
+// New - helper function
 func New(serverAddr string) (*BurstClient, error) {
 	client := &BurstClient{
 		serverAddr: serverAddr,
@@ -34,6 +34,7 @@ func New(serverAddr string) (*BurstClient, error) {
 
 	return client, nil
 }
+
 
 func (b *BurstClient) makeURL(endpoint string) string {
 	return b.serverAddr + endpoint
@@ -54,7 +55,7 @@ func (b *BurstClient) ping() error {
 	return nil
 }
 
-// GetBookIDs ...
+// GetBookIDs - get books id by type id
 func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 
 	id := strconv.Itoa(typeID)
@@ -72,7 +73,7 @@ func (b *BurstClient) GetBookIDs(typeID int) ([]int, error) {
 	return respData.BooksIDs, nil
 }
 
-// RemoveAllTypes ...
+// RemoveAllTypes - remove all types with books
 func (b *BurstClient) RemoveAllTypes() error {
 	url := b.makeURL("/v1.0/types/")
 
@@ -95,7 +96,7 @@ func (b *BurstClient) RemoveAllTypes() error {
 	return nil
 }
 
-// RemoveAllBooks ...
+// RemoveAllBooks - just remove all books
 func (b *BurstClient) RemoveAllBooks() error {
 	url := b.makeURL("/v1.0/books/remove/")
 
@@ -118,7 +119,7 @@ func (b *BurstClient) RemoveAllBooks() error {
 	return nil
 }
 
-// GetAllTypes ...
+// GetAllTypes - getting all types
 func (b *BurstClient) GetAllTypes() ([]*model.Type, error) {
 
 	url := b.makeURL("/v1.0/types/")
@@ -136,7 +137,7 @@ func (b *BurstClient) GetAllTypes() ([]*model.Type, error) {
 	return types, nil
 }
 
-// CreateType ...
+// CreateType - just creating type
 func (b *BurstClient) CreateType(_type *model.Type) (int, error) {
 	url := b.makeURL("/v1.0/types/create/")
 
@@ -167,7 +168,7 @@ func (b *BurstClient) CreateType(_type *model.Type) (int, error) {
 	return response.ID, nil
 }
 
-// CreateBook ...
+// CreateBook - just creating book
 func (b *BurstClient) CreateBook(book *model.Book) (*BookUploadTokens, error) {
 	url := b.makeURL("/v1.0/books/create/")
 
@@ -195,7 +196,7 @@ func (b *BurstClient) CreateBook(book *model.Book) (*BookUploadTokens, error) {
 	return tokens, nil
 }
 
-// GetBookByID ...
+// GetBookByID - geting book by id
 func (b *BurstClient) GetBookByID(ID int) (*model.Book, error) {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/")
 
@@ -213,7 +214,7 @@ func (b *BurstClient) GetBookByID(ID int) (*model.Book, error) {
 	return book, nil
 }
 
-// GetBookPreview ...
+// GetBookPreview - geting book preview (some image like a JPG, PNG)
 func (b *BurstClient) GetBookPreview(ID int) *FileResponse {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/preview/")
 
@@ -234,7 +235,7 @@ func (b *BurstClient) GetBookPreview(ID int) *FileResponse {
 	return &FileResponse{FileName: fileName, Data: bodyBytes, Err: nil}
 }
 
-// SendBookFile ...
+// SendBookFile - uploading book file (like a PDF), requries upload token (UUID)
 func (b *BurstClient) SendBookFile(filePath string, bookID int, UUID string) error {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/file/")
 
@@ -261,7 +262,7 @@ func (b *BurstClient) SendBookFile(filePath string, bookID int, UUID string) err
 	return nil
 }
 
-// GetBookFile ...
+// GetBookFile - just getting bool file 
 func (b *BurstClient) GetBookFile(ID int) *FileResponse {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(ID) + "/file/")
 
@@ -282,7 +283,7 @@ func (b *BurstClient) GetBookFile(ID int) *FileResponse {
 	return &FileResponse{FileName: fileName, Data: bodyBytes, Err: nil}
 }
 
-// SendPreview ...
+// SendBookFile - uploading book preview (like a JPG, PNG), requries upload token (UUID)
 func (b *BurstClient) SendPreview(filePath string, bookID int, UUID string) error {
 	url := b.makeURL("/v1.0/books/" + strconv.Itoa(bookID) + "/preview/")
 

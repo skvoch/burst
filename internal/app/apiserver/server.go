@@ -28,6 +28,7 @@ type server struct {
 	router            *mux.Router
 	store             store.Store
 	log               *logrus.Logger
+	
 	assetPath         string
 	previewsDirectory string
 	filesDirecotry    string
