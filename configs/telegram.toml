@@ -1,3 +1,3 @@
-application_token = "1052184269:AAGS5P0hzMK1MdIidWevNTTrr-PF8xcnWiA"
+application_token = "PUT_YOUR_TELEGRAM_TOKEN_HERE"
 burst_server_addr = "http://localhost:9000"
 owner_id = 1038884183
